@@ -214,11 +214,9 @@ const HomePage = () => {
                                     <div style={{ width: "120px", height: "90px", flexShrink: 0, borderRadius: "8px", overflow: "hidden" }}>
                                         {/* 3. FIXED: Uses BASE_URL for Post Cover Image */}
                                         <img
-                                            src={`${BASE_URL}/uploads/${coverImage}`}
-                                            alt={post.title}
-                                            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }}
-                                            onMouseEnter={e => (e.target.style.transform = "scale(1.05)")}
-                                            onMouseLeave={e => (e.target.style.transform = "scale(1)")}
+                                            src={`${BASE_URL}/uploads/logo.png`}
+                                            alt="Logo"
+                                            style={{ width: "40px", height: "40px" }}
                                         />
                                     </div>
                                 )}

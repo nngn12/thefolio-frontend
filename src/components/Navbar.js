@@ -3,6 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
+const BASE_URL = process.env.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL.replace('/api', '')
+    : 'http://localhost:5000';
+
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -65,7 +69,7 @@ const Navbar = () => {
 
     // ── FIXED PROFILE PIC ──
     const profileSrc = user?.profile_pic
-        ? `http://localhost:5000/uploads/${user.profile_pic}`
+        ? `${BASE_URL}/uploads/${user.profile_pic}`
         : null;
 
     return (
@@ -85,11 +89,10 @@ const Navbar = () => {
             }}>
                 {/* LOGO */}
                 <div onClick={() => go("/home")} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                    <img src="http://localhost:5000/uploads/logo.png" alt="logo" style={{ width: "32px", height: "32px" }} />
+                    <img src={`${BASE_URL}/uploads/logo.png`} alt="logo" style={{ width: "32px", height: "32px" }} />
                     <span style={{ background: "linear-gradient(135deg,#ec4899,#60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Captured Memories</span>
                 </div>
 
-                {/* CENTER LINKS */}
                 <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
                     {user?.role === "admin" ? (
                         <>
@@ -104,9 +107,7 @@ const Navbar = () => {
                     )}
                 </div>
 
-                {/* RIGHT SIDE */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                    {/* Dark / Light toggle */}
                     <button onClick={toggleTheme} title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} style={{
                         width: "50px", height: "26px", borderRadius: "13px",
                         border: "none", cursor: "pointer", position: "relative",
@@ -120,9 +121,7 @@ const Navbar = () => {
                             background: "white", transition: "left 0.3s",
                             display: "flex", alignItems: "center",
                             justifyContent: "center", fontSize: "11px",
-                        }}>
-                            {isDark ? "🌙" : "☀️"}
-                        </div>
+                        }}>{isDark ? "🌙" : "☀️"}</div>
                     </button>
 
                     {user ? (
@@ -154,7 +153,6 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* LOGOUT MODAL */}
             {showLogoutModal && (
                 <div style={{
                     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
@@ -163,12 +161,9 @@ const Navbar = () => {
                 }}>
                     <div style={{
                         background: isDark ? "#111" : "#fff",
-                        padding: "24px",
-                        borderRadius: "12px",
-                        maxWidth: "320px",
-                        width: "90%",
-                        textAlign: "center",
-                        boxShadow: "0 4px 24px rgba(0,0,0,0.2)"
+                        padding: "24px", borderRadius: "12px",
+                        maxWidth: "320px", width: "90%",
+                        textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.2)"
                     }}>
                         <p style={{ color: textCol, fontSize: "16px", marginBottom: "20px" }}>Are you sure you want to log out?</p>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>

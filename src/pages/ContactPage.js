@@ -4,6 +4,11 @@ import { useAuth } from "../context/AuthContext";
 import { getTheme } from "../theme";
 import API from "../api/axios";
 
+// 1. ADDED THIS: Create a base URL for the image by removing '/api' from your environment variable
+const BASE_URL = process.env.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL.replace('/api', '')
+    : 'http://localhost:5000';
+
 const ContactPage = () => {
     const { isDark } = useTheme();
     const { user } = useAuth();
@@ -183,7 +188,8 @@ const ContactPage = () => {
                 <div style={card}>
                     <h2 style={{ color: t.text, marginBottom: "6px" }}>My Location</h2>
                     <p style={{ color: t.textSub, marginBottom: "12px" }}>This is a general location map for reference only.</p>
-                    <img src="http://localhost:5000/uploads/map.png" alt="Map" style={{ width: "100%", borderRadius: "10px" }} />
+                    {/* 2. ADDED THIS: Swapped localhost for the BASE_URL variable */}
+                    <img src={`${BASE_URL}/uploads/map.png`} alt="Map" style={{ width: "100%", borderRadius: "10px" }} />
                 </div>
             </main>
             <footer style={{ textAlign: "center", color: t.textMuted }}><p><strong>♥ Just us ♥</strong></p></footer>

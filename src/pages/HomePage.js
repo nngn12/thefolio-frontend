@@ -5,6 +5,12 @@ import { useTheme } from "../context/ThemeContext";
 import { getTheme } from "../theme";
 import API from "../api/axios";
 
+// 1. DYNAMIC BASE URL: This removes '/api' from your environment variable 
+// to point correctly to the root of your backend for images.
+const BASE_URL = process.env.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL.replace('/api', '')
+    : 'http://localhost:5000';
+
 const HomePage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -12,9 +18,6 @@ const HomePage = () => {
     const t = getTheme(isDark);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    // Backend URL from environment variable
-    const backendUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
     useEffect(() => {
         API.get("/posts")
@@ -158,9 +161,10 @@ const HomePage = () => {
                                                 overflow: "hidden"
                                             }}
                                         >
+                                            {/* 2. FIXED: Uses BASE_URL for Author Profile Pic */}
                                             {authorPic ? (
                                                 <img
-                                                    src={`${backendUrl}/uploads/${authorPic}`}
+                                                    src={`${BASE_URL}/uploads/${authorPic}`}
                                                     alt=""
                                                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                                 />
@@ -208,8 +212,9 @@ const HomePage = () => {
 
                                 {coverImage && (
                                     <div style={{ width: "120px", height: "90px", flexShrink: 0, borderRadius: "8px", overflow: "hidden" }}>
+                                        {/* 3. FIXED: Uses BASE_URL for Post Cover Image */}
                                         <img
-                                            src={`${backendUrl}/uploads/${coverImage}`}
+                                            src={`${BASE_URL}/uploads/${coverImage}`}
                                             alt={post.title}
                                             style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }}
                                             onMouseEnter={e => (e.target.style.transform = "scale(1.05)")}

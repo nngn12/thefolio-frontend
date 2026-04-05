@@ -28,23 +28,7 @@ const HomePage = () => {
     return (
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh", paddingBottom: "80px" }}>
 
-            {/* --- NEW HEADER SECTION FOR LOGO --- */}
-            <div style={{
-                padding: "20px 24px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                maxWidth: "1200px",
-                margin: "0 auto"
-            }}>
-                <img
-                    src={`${BASE_URL}/uploads/logo.png`}
-                    alt="Logo"
-                    style={{ width: "40px", height: "40px", cursor: "pointer", objectFit: "contain" }}
-                    onClick={() => navigate("/")}
-                    onError={(e) => e.target.style.display = 'none'} // Hides if image fails to load
-                />
-            </div>
+            {/* --- EXTRA HEADER REMOVED FROM HERE --- */}
 
             {/* Hero */}
             <div
@@ -95,7 +79,6 @@ const HomePage = () => {
 
                 <div style={{ display: "grid", gap: "2px" }}>
                     {posts.map((post, i) => {
-                        // FIXED: Use the post's actual image if it exists
                         const postImage = post.image ? `${BASE_URL}/uploads/${post.image}` : null;
                         const authorName = post.author_name || "Unknown";
                         const authorPic = post.author_pic ? `${BASE_URL}/uploads/${post.author_pic}` : null;
@@ -139,7 +122,6 @@ const HomePage = () => {
                                     </p>
                                 </div>
 
-                                {/* FIXED: Show post image if it exists, otherwise show nothing or a placeholder */}
                                 {postImage && (
                                     <div style={{ width: "120px", height: "90px", flexShrink: 0, borderRadius: "8px", overflow: "hidden", background: t.border }}>
                                         <img

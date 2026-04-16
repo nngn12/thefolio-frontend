@@ -12,7 +12,7 @@ const CreatePostPage = () => {
     const t = getTheme(isDark);
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
-    const [images, setImages] = useState([]);
+    const [images, setImages] = useState([]); // ✅ Array for multiple files
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -27,7 +27,11 @@ const CreatePostPage = () => {
             const fd = new FormData();
             fd.append("title", title);
             fd.append("body", body);
-            if (images[0]) fd.append("image", images[0]); // <<< UPDATED for backend
+
+            // ✅ Append each image to the 'images' field (must match backend)
+            images.forEach((file) => {
+                fd.append("images", file);
+            });
 
             await API.post("/posts", fd, { headers: { "Content-Type": "multipart/form-data" } });
             navigate("/home");
@@ -69,14 +73,15 @@ const CreatePostPage = () => {
                                 padding: "9px 20px", borderRadius: "8px", border: `1px solid ${t.border}`,
                                 color: t.textSub, fontSize: "13px", cursor: "pointer", background: "transparent",
                             }}>
-                                {previews.length ? "Change photo" : "Choose photo"}
+                                {previews.length ? "Add more photos" : "Choose photos"}
                             </label>
-                            <input id="img-upload" type="file" accept="image/*,.jfif" style={{ display: "none" }}
+                            <input id="img-upload" type="file" accept="image/*,.jfif" multiple style={{ display: "none" }}
                                 onChange={e => {
                                     const files = Array.from(e.target.files);
                                     if (files.length) {
-                                        setImages([files[0]]); // <<< only first image
-                                        setPreviews([URL.createObjectURL(files[0])]);
+                                        setImages(prev => [...prev, ...files]);
+                                        const newPreviews = files.map(f => URL.createObjectURL(f));
+                                        setPreviews(prev => [...prev, ...newPreviews]);
                                     }
                                 }} />
                         </div>
@@ -86,8 +91,10 @@ const CreatePostPage = () => {
                                     <div key={`${p}-${idx}`} style={{ position: "relative", borderRadius: "10px", overflow: "hidden" }}>
                                         <img src={p} alt={`Preview ${idx + 1}`} style={{ width: "100%", height: "88px", objectFit: "cover" }} />
                                         <button type="button" onClick={() => {
-                                            setImages([]);
-                                            setPreviews([]);
+                                            const newImages = images.filter((_, i) => i !== idx);
+                                            const newPreviews = previews.filter((_, i) => i !== idx);
+                                            setImages(newImages);
+                                            setPreviews(newPreviews);
                                         }} style={{ position: "absolute", top: "6px", right: "6px", width: "22px", height: "22px", borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.55)", color: "white", cursor: "pointer", fontSize: "12px" }}>×</button>
                                     </div>
                                 ))}

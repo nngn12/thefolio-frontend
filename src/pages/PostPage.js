@@ -17,6 +17,9 @@ const PostPage = () => {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
+    // ✅ Define your live backend URL here for easy updates
+    const BACKEND_URL = "https://thefolio-backend.onrender.com";
+
     useEffect(() => {
         Promise.all([API.get(`/posts/${id}`), API.get(`/comments/${id}`)])
             .then(([p, c]) => { setPost(p.data); setComments(c.data); })
@@ -63,7 +66,7 @@ const PostPage = () => {
 
     const miniAvatar = (name, pic) => (
         <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: t.pinkGrad, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "11px", fontWeight: "700", overflow: "hidden", flexShrink: 0 }}>
-            {pic ? <img src={`http://localhost:5000/uploads/${pic}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name?.[0]?.toUpperCase()}
+            {pic ? <img src={`${BACKEND_URL}/uploads/${pic}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name?.[0]?.toUpperCase()}
         </div>
     );
 
@@ -89,14 +92,19 @@ const PostPage = () => {
                         {post.title}
                     </h1>
 
+                    {/* ✅ FIXED IMAGE DISPLAY FOR MULTIPLE PHOTOS */}
                     {(() => {
-                        const images = post.image ? [post.image] : [];
+                        const images = post.image ? post.image.split(',') : [];
                         if (images.length === 0) return null;
                         return (
-                            <div style={{ display: "grid", gap: "10px", marginBottom: "36px" }}>
+                            <div style={{ display: "grid", gap: "12px", marginBottom: "36px" }}>
                                 {images.map((img, idx) => (
-                                    <img key={`${img}-${idx}`} src={`http://localhost:5000/uploads/${img}`} alt={`${post.title} ${idx + 1}`}
-                                        style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: "10px", display: "block" }} />
+                                    <img
+                                        key={`${img}-${idx}`}
+                                        src={`${BACKEND_URL}/uploads/${img}`}
+                                        alt={`${post.title} ${idx + 1}`}
+                                        style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: "12px", display: "block" }}
+                                    />
                                 ))}
                             </div>
                         );

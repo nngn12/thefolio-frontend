@@ -41,7 +41,7 @@ const SplashPage = () => {
             </div>
 
             <div style={{ textAlign: "center", animation: "fadeUp 0.9s ease both" }}>
-                {/* ✅ FIXED: Points to the public folder of your live site */}
+                {/* ✅ FIXED: Points directly to the logo in your public folder */}
                 <img src="/logo.png" alt="logo"
                     style={{
                         width: "80px",
@@ -52,10 +52,7 @@ const SplashPage = () => {
                         boxShadow: "0 8px 32px rgba(190,24,93,0.2)",
                         objectFit: "cover"
                     }}
-                    onError={e => {
-                        // If it fails, we show a nice fallback circle with the first letter
-                        e.target.style.display = "none";
-                    }}
+                    onError={e => { e.target.style.display = "none"; }}
                 />
 
                 <h1 style={{

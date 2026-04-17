@@ -17,7 +17,7 @@ const PostPage = () => {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    // ✅ Define your live backend URL here for easy updates
+    // ✅ Only used for fallback or legacy profile pics
     const BACKEND_URL = "https://thefolio-backend.onrender.com";
 
     useEffect(() => {
@@ -64,11 +64,17 @@ const PostPage = () => {
     const isOwner = user && (user.id === post.author_id);
     const isAdmin = user?.role === "admin";
 
-    const miniAvatar = (name, pic) => (
-        <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: t.pinkGrad, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "11px", fontWeight: "700", overflow: "hidden", flexShrink: 0 }}>
-            {pic ? <img src={`${BACKEND_URL}/uploads/${pic}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name?.[0]?.toUpperCase()}
-        </div>
-    );
+    // ✅ FIXED: Handle profile pictures correctly
+    const miniAvatar = (name, pic) => {
+        const isFullUrl = pic?.startsWith('http');
+        const avatarSrc = isFullUrl ? pic : `${BACKEND_URL}/uploads/${pic}`;
+
+        return (
+            <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: t.pinkGrad, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "11px", fontWeight: "700", overflow: "hidden", flexShrink: 0 }}>
+                {pic ? <img src={avatarSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name?.[0]?.toUpperCase()}
+            </div>
+        );
+    };
 
     return (
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh", paddingBottom: "80px" }}>
@@ -92,7 +98,7 @@ const PostPage = () => {
                         {post.title}
                     </h1>
 
-                    {/* ✅ FIXED IMAGE DISPLAY FOR MULTIPLE PHOTOS */}
+                    {/* ✅ FIXED: Removed BACKEND_URL prefix for Supabase images */}
                     {(() => {
                         const images = post.image ? post.image.split(',') : [];
                         if (images.length === 0) return null;
@@ -101,9 +107,10 @@ const PostPage = () => {
                                 {images.map((img, idx) => (
                                     <img
                                         key={`${img}-${idx}`}
-                                        src={`${BACKEND_URL}/uploads/${img}`}
+                                        src={img} // 👈 Using the Supabase URL directly
                                         alt={`${post.title} ${idx + 1}`}
-                                        style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: "12px", display: "block" }}
+                                        style={{ width: "100%", borderRadius: "12px", display: "block", objectFit: "cover" }}
+                                        onError={(e) => { e.target.style.display = 'none'; }}
                                     />
                                 ))}
                             </div>

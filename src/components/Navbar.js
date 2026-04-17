@@ -3,15 +3,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
+const BASE_URL = process.env.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL.replace('/api', '')
+    : 'http://localhost:5000';
+
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user, logout } = useAuth();
     const { isDark, toggleTheme } = useTheme();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-    // ✅ Backend URL for fallback legacy profile pics
-    const BACKEND_URL = "https://thefolio-backend.onrender.com";
 
     if (location.pathname === "/") return null;
 
@@ -66,9 +67,9 @@ const Navbar = () => {
         </>
     );
 
-    // ✅ FIXED PROFILE PIC LOGIC (Checks if it's already a full Supabase URL)
+    // ── FIXED PROFILE PIC ──
     const profileSrc = user?.profile_pic
-        ? (user.profile_pic.startsWith('http') ? user.profile_pic : `${BACKEND_URL}/uploads/${user.profile_pic}`)
+        ? `${BASE_URL}/uploads/${user.profile_pic}`
         : null;
 
     return (
@@ -86,22 +87,20 @@ const Navbar = () => {
                 display: "flex", alignItems: "center",
                 justifyContent: "space-between", gap: "8px",
             }}>
-                {/* LOGO - FIXED PATH */}
+                {/* LOGO */}
                 <div onClick={() => go("/home")} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                    <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px", borderRadius: "50%" }} />
-                    <span style={{ fontWeight: "bold", background: "linear-gradient(135deg,#ec4899,#60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Captured Memories</span>
+                    <img src={`${BASE_URL}/uploads/logo.png`} alt="logo" style={{ width: "32px", height: "32px" }} />
+                    <span style={{ background: "linear-gradient(135deg,#ec4899,#60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Captured Memories</span>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
                     {user?.role === "admin" ? (
                         <>
-                            <span style={link("/admin")} onClick={() => go("/admin")}>🛠 Admin Panel</span>
+                            <span style={link("/admin")} onClick={() => go("/admin")}>🛠 Dashboard</span>
                             {publicLinks}
                         </>
                     ) : (
                         <>
-                            {/* ✅ NEW: Member Dashboard link appears for non-admins */}
-                            {user && <span style={link("/dashboard")} onClick={() => go("/dashboard")}>📊 My Dashboard</span>}
                             {publicLinks}
                             {user && <span style={link("/create")} onClick={() => go("/create")}>+ New Post</span>}
                         </>
@@ -154,7 +153,6 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* LOGOUT MODAL */}
             {showLogoutModal && (
                 <div style={{
                     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",

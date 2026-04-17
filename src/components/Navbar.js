@@ -95,25 +95,25 @@ const Navbar = () => {
                     </span>
                 </div>
 
-                {/* NAV LINKS */}
-                <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
-                    <span style={link("/home")} onClick={() => go("/home")}>Home</span>
+                {/* ✅ DASHBOARD MOVED HERE (BESIDE HOME) */}
+                {user && (
+                    <span
+                        style={link(user.role === "admin" ? "/admin" : "/dashboard")}
+                        onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
+                    >
+                        {user.role === "admin" ? "Admin Panel" : "Dashboard"}
+                    </span>
+                )}
 
-                    {/* ✅ DASHBOARD MOVED HERE (BESIDE HOME) */}
-                    {user && (
-                        <span
-                            style={link(user.role === "admin" ? "/admin" : "/dashboard")}
-                            onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
-                        >
-                            📊 {user.role === "admin" ? "Admin Panel" : "Dashboard"}
-                        </span>
-                    )}
+                <span style={link("/about")} onClick={() => go("/about")}>About</span>
+                <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
 
-                    <span style={link("/about")} onClick={() => go("/about")}>About</span>
-                    <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
+                {/* ✅ "+ New Post" REMOVED FROM HERE */}
+            </div>
 
-                    {/* ✅ "+ New Post" REMOVED FROM HERE */}
-                </div>
+            {/* NAV LINKS */}
+            <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
+                <span style={link("/home")} onClick={() => go("/home")}>Home</span>
 
                 {/* RIGHT SIDE */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>

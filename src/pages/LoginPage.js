@@ -18,7 +18,7 @@ const LoginPage = () => {
         e.preventDefault();
         if (!email || !password) return setError("Please fill in all fields");
 
-        if (loading) return; // prevent double click
+        if (loading) return;
         setLoading(true);
         setError("");
 
@@ -28,6 +28,8 @@ const LoginPage = () => {
             if (result?.success) {
                 navigate("/home");
             } else {
+                // This will display the "Please verify your email" message 
+                // sent from your backend if the user isn't verified.
                 setError(result?.message || "Login failed");
             }
         } catch (err) {
@@ -54,6 +56,7 @@ const LoginPage = () => {
             justifyContent: "center", alignItems: "center",
             padding: "20px",
         }}>
+            {/* Ambient Background Glow */}
             <div style={{
                 position: "fixed", top: "20%", right: "15%",
                 width: "340px", height: "340px", borderRadius: "50%",
@@ -87,6 +90,7 @@ const LoginPage = () => {
                         background: isDark ? "rgba(190,24,93,0.1)" : "#fef2f2",
                         border: `1px solid rgba(190,24,93,0.2)`,
                         fontSize: "13px", color: t.danger,
+                        textAlign: "center"
                     }}>{error}</div>
                 )}
 
@@ -125,12 +129,5 @@ const LoginPage = () => {
         </div>
     );
 };
-
-// Inside your login success handler
-if (!user.is_verified) {
-    return res.status(401).json({ message: "..." });
-}
-// OR
-navigate("/login");
 
 export default LoginPage;

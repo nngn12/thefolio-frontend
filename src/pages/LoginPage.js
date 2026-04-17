@@ -127,10 +127,10 @@ const LoginPage = () => {
 };
 
 // Inside your login success handler
-if (user.role === 'admin') {
-    navigate("/admin");
-} else {
-    navigate("/dashboard"); // This takes Ana to UserDashboard.js
+if (!user.is_verified) {
+    return res.status(401).json({ message: "..." });
 }
+// OR
+navigate("/login");
 
 export default LoginPage;

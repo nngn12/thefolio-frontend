@@ -5,11 +5,6 @@ import { useTheme } from "../context/ThemeContext";
 import { getTheme } from "../theme";
 import API from "../api/axios";
 
-// This removes '/api' from your URL so it points to the root /uploads folder
-const BASE_URL = process.env.REACT_APP_API_URL
-    ? process.env.REACT_APP_API_URL.replace('/api', '')
-    : 'http://localhost:5000';
-
 const HomePage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -28,9 +23,7 @@ const HomePage = () => {
     return (
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh", paddingBottom: "80px" }}>
 
-            {/* --- EXTRA HEADER REMOVED FROM HERE --- */}
-
-            {/* Hero */}
+            {/* Hero Section */}
             <div
                 style={{
                     borderBottom: `1px solid ${t.border}`,
@@ -79,9 +72,11 @@ const HomePage = () => {
 
                 <div style={{ display: "grid", gap: "2px" }}>
                     {posts.map((post, i) => {
-                        const postImage = post.image ? `${BASE_URL}/uploads/${post.image}` : null;
+                        // ✅ FIX: Use the URL directly from the database (no BASE_URL/uploads/ needed)
+                        const postImage = post.image ? post.image.split(',')[0] : null;
                         const authorName = post.author_name || "Unknown";
-                        const authorPic = post.author_pic ? `${BASE_URL}/uploads/${post.author_pic}` : null;
+                        const authorPic = post.author_pic || null;
+
                         const formattedDate = post.created_at
                             ? new Date(post.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
                             : "No date";

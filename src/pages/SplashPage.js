@@ -7,7 +7,7 @@ const SplashPage = () => {
     const navigate = useNavigate();
     const { isDark } = useTheme();
     const t = getTheme(isDark);
-    const [phase, setPhase] = useState(0); // 0=loading 1=fadeout
+    const [phase, setPhase] = useState(0);
 
     useEffect(() => {
         const t1 = setTimeout(() => setPhase(1), 2600);
@@ -26,7 +26,6 @@ const SplashPage = () => {
             opacity: phase === 1 ? 0 : 1,
             transition: "opacity 0.6s ease",
         }}>
-            {/* decorative petal lines */}
             <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
                 {[...Array(5)].map((_, i) => (
                     <div key={i} style={{
@@ -42,10 +41,23 @@ const SplashPage = () => {
             </div>
 
             <div style={{ textAlign: "center", animation: "fadeUp 0.9s ease both" }}>
-                <img src="http://localhost:5000/uploads/logo.png" alt="logo"
-                    style={{ width: "80px", height: "80px", borderRadius: "50%", marginBottom: "28px", animation: "float 3s ease-in-out infinite", boxShadow: "0 8px 32px rgba(190,24,93,0.2)" }}
-                    onError={e => e.target.style.display = "none"}
+                {/* ✅ FIXED: Points to the public folder of your live site */}
+                <img src="/logo.png" alt="logo"
+                    style={{
+                        width: "80px",
+                        height: "80px",
+                        borderRadius: "50%",
+                        marginBottom: "28px",
+                        animation: "float 3s ease-in-out infinite",
+                        boxShadow: "0 8px 32px rgba(190,24,93,0.2)",
+                        objectFit: "cover"
+                    }}
+                    onError={e => {
+                        // If it fails, we show a nice fallback circle with the first letter
+                        e.target.style.display = "none";
+                    }}
                 />
+
                 <h1 style={{
                     fontFamily: t.fontSerif,
                     fontSize: "clamp(36px, 6vw, 56px)",
@@ -69,7 +81,6 @@ const SplashPage = () => {
                     Preserve your moments beautifully
                 </p>
 
-                {/* elegant spinner */}
                 <div style={{
                     width: "36px", height: "36px",
                     borderRadius: "50%",
@@ -88,4 +99,5 @@ const SplashPage = () => {
         </div>
     );
 };
+
 export default SplashPage;

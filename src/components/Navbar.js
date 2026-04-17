@@ -40,7 +40,6 @@ const Navbar = () => {
             : "transparent",
         color: isActive(path) ? "#ec4899" : mutedCol,
         border: "none",
-        transition: "all 0.2s",
     });
 
     const authBtn = (variant) => ({
@@ -49,7 +48,6 @@ const Navbar = () => {
         cursor: "pointer",
         fontSize: "13px",
         fontWeight: "700",
-        whiteSpace: "nowrap",
         border: variant === "outline" ? "2px solid #ec4899" : "none",
         background: variant === "fill" ? "linear-gradient(135deg,#ec4899,#f472b6)" : "transparent",
         color: variant === "fill" ? "white" : "#ec4899",
@@ -76,47 +74,46 @@ const Navbar = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: "8px",
             }}>
 
-                {/* LOGO */}
-                <div
-                    onClick={() => go("/home")}
-                    style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
-                >
-                    <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px" }} />
-                    <span style={{
-                        background: "linear-gradient(135deg,#ec4899,#60a5fa)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        fontWeight: "bold"
-                    }}>
-                        Captured Memories
-                    </span>
+                {/* LEFT SIDE */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+
+                    {/* LOGO */}
+                    <div
+                        onClick={() => go("/home")}
+                        style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
+                    >
+                        <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px" }} />
+                        <span style={{
+                            background: "linear-gradient(135deg,#ec4899,#60a5fa)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            fontWeight: "bold"
+                        }}>
+                            Captured Memories
+                        </span>
+                    </div>
+
+                    {/* DASHBOARD FIRST */}
+                    {user && (
+                        <span
+                            style={link(user.role === "admin" ? "/admin" : "/dashboard")}
+                            onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
+                        >
+                            {user.role === "admin" ? "Admin Panel" : "Dashboard"}
+                        </span>
+                    )}
+
+                    <span style={link("/home")} onClick={() => go("/home")}>Home</span>
+                    <span style={link("/about")} onClick={() => go("/about")}>About</span>
+                    <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
                 </div>
 
-                {/* ✅ DASHBOARD MOVED HERE (BESIDE HOME) */}
-                {user && (
-                    <span
-                        style={link(user.role === "admin" ? "/admin" : "/dashboard")}
-                        onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
-                    >
-                        {user.role === "admin" ? "Admin Panel" : "Dashboard"}
-                    </span>
-                )}
-
-                <span style={link("/about")} onClick={() => go("/about")}>About</span>
-                <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
-
-                {/* ✅ "+ New Post" REMOVED FROM HERE */}
-            </div>
-
-            {/* NAV LINKS */}
-            <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
-                <span style={link("/home")} onClick={() => go("/home")}>Home</span>
-
                 {/* RIGHT SIDE */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+
+                    {/* THEME TOGGLE */}
                     <button
                         onClick={toggleTheme}
                         style={{
@@ -149,6 +146,7 @@ const Navbar = () => {
                         </div>
                     </button>
 
+                    {/* USER SECTION */}
                     {user ? (
                         <>
                             <div
@@ -157,19 +155,18 @@ const Navbar = () => {
                                     width: "32px",
                                     height: "32px",
                                     borderRadius: "50%",
+                                    overflow: "hidden",
+                                    cursor: "pointer",
                                     background: "linear-gradient(135deg,#ec4899,#f472b6)",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     color: "white",
                                     fontWeight: "bold",
-                                    fontSize: "13px",
-                                    cursor: "pointer",
-                                    overflow: "hidden",
                                 }}
                             >
                                 {profileSrc
-                                    ? <img src={profileSrc} alt="av" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    ? <img src={profileSrc} alt="av" style={{ width: "100%", height: "100%" }} />
                                     : user.name?.[0]?.toUpperCase()
                                 }
                             </div>
@@ -199,10 +196,7 @@ const Navbar = () => {
             {showLogoutModal && (
                 <div style={{
                     position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
+                    inset: 0,
                     background: "rgba(0,0,0,0.45)",
                     display: "flex",
                     alignItems: "center",
@@ -217,8 +211,19 @@ const Navbar = () => {
                     }}>
                         <p>Are you sure you want to log out?</p>
                         <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "15px" }}>
-                            <button style={{ padding: "6px 12px", cursor: "pointer" }} onClick={cancelLogout}>Cancel</button>
-                            <button style={{ padding: "6px 12px", cursor: "pointer", background: "#ec4899", color: "white", border: "none", borderRadius: "4px" }} onClick={confirmLogout}>Logout</button>
+                            <button onClick={cancelLogout}>Cancel</button>
+                            <button
+                                onClick={confirmLogout}
+                                style={{
+                                    background: "#ec4899",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    padding: "6px 12px",
+                                }}
+                            >
+                                Logout
+                            </button>
                         </div>
                     </div>
                 </div>

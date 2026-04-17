@@ -64,6 +64,7 @@ const Navbar = () => {
             <span style={link("/home")} onClick={() => go("/home")}>Home</span>
             <span style={link("/about")} onClick={() => go("/about")}>About</span>
             <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
+            <span style={link("/dashboard")}>📊 My Dashboard</span>
         </>
     );
 

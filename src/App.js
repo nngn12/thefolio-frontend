@@ -47,6 +47,7 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/post/:id" element={<PostPage />} />
+                <Route path="/dashboard" element={<MemberDashboard />} />
 
                 {/* Redirect to /home if already logged in */}
                 <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage />} />

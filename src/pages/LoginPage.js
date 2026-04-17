@@ -126,4 +126,11 @@ const LoginPage = () => {
     );
 };
 
+// Inside your login success handler
+if (user.role === 'admin') {
+    navigate("/admin");
+} else {
+    navigate("/dashboard"); // This takes Ana to UserDashboard.js
+}
+
 export default LoginPage;

@@ -13,6 +13,8 @@ import CreatePostPage from "./pages/CreatePostPage";
 import EditPostPage from "./pages/EditPostPage";
 import PostPage from "./pages/PostPage";
 import AdminPage from "./pages/AdminPage";
+// 1. CHANGE THIS LINE: Import UserDashboard instead of MemberDashboard
+import UserDashboard from "./pages/UserDashboard";
 
 function App() {
     const { user, authLoading } = useAuth();
@@ -47,7 +49,9 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/post/:id" element={<PostPage />} />
-                <Route path="/dashboard" element={<MemberDashboard />} />
+
+                {/* 2. CHANGE THIS LINE: Use UserDashboard as the element */}
+                <Route path="/dashboard" element={user ? <UserDashboard /> : <Navigate to="/login" />} />
 
                 {/* Redirect to /home if already logged in */}
                 <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage />} />

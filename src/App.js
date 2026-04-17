@@ -13,32 +13,13 @@ import CreatePostPage from "./pages/CreatePostPage";
 import EditPostPage from "./pages/EditPostPage";
 import PostPage from "./pages/PostPage";
 import AdminPage from "./pages/AdminPage";
-// 1. CHANGE THIS LINE: Import UserDashboard instead of MemberDashboard
 import UserDashboard from "./pages/UserDashboard";
+import VerifyPage from "./pages/VerifyPage"; // New: OTP Input Page
 
 function App() {
     const { user, authLoading } = useAuth();
 
-    // Wait for token verification before rendering routes
-    if (authLoading) {
-        return (
-            <div style={{
-                height: "100vh", display: "flex", justifyContent: "center", alignItems: "center",
-                background: "linear-gradient(135deg, #fde2e4, #e0f2fe)",
-                fontFamily: "'Segoe UI', sans-serif", color: "#6b7280"
-            }}>
-                <div style={{ textAlign: "center" }}>
-                    <div style={{
-                        width: "50px", height: "50px", border: "5px solid #fbcfe8",
-                        borderTop: "5px solid #ec4899", borderRadius: "50%",
-                        margin: "0 auto 16px", animation: "spin 1s linear infinite"
-                    }} />
-                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                    <p>Loading...</p>
-                </div>
-            </div>
-        );
-    }
+    if (authLoading) return <div className="loading-spinner">Loading...</div>;
 
     return (
         <Router>
@@ -46,27 +27,22 @@ function App() {
             <Routes>
                 <Route path="/" element={<SplashPage />} />
                 <Route path="/home" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/post/:id" element={<PostPage />} />
+                <Route path="/verify" element={<VerifyPage />} />
 
-                {/* 2. CHANGE THIS LINE: Use UserDashboard as the element */}
-                <Route path="/dashboard" element={user ? <UserDashboard /> : <Navigate to="/login" />} />
+                {/* Dashboard: Must be logged in AND verified */}
+                <Route path="/dashboard" element={
+                    user ? (user.is_verified ? <UserDashboard /> : <Navigate to="/verify" />) : <Navigate to="/login" />
+                } />
 
-                {/* Redirect to /home if already logged in */}
                 <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage />} />
-                <Route path="/register" element={user ? <Navigate to="/home" /> : <RegisterPage />} />
-
-                {/* Member-only routes */}
+                <Route path="/register" element={user ? <Navigate to="/verify" /> : <RegisterPage />} />
+                <Route path="/post/:id" element={<PostPage />} />
                 <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
                 <Route path="/create" element={user ? <CreatePostPage /> : <Navigate to="/login" />} />
                 <Route path="/edit/:id" element={user ? <EditPostPage /> : <Navigate to="/login" />} />
-
-                {/* Admin-only route */}
                 <Route path="/admin" element={user?.role === "admin" ? <AdminPage /> : <Navigate to="/home" />} />
             </Routes>
         </Router>
     );
 }
-
 export default App;

@@ -24,11 +24,11 @@ const Navbar = () => {
     const cancelLogout = () => setShowLogoutModal(false);
 
     const navBg = isDark ? "rgba(15,5,15,0.90)" : "rgba(255,255,255,0.80)";
-    const border = isDark ? "rgba(236,72,153,0.25)" : "rgba(236,72,153,0.18)";
+    const borderCol = isDark ? "rgba(236,72,153,0.25)" : "rgba(236,72,153,0.18)";
     const textCol = isDark ? "#f3f4f6" : "#1f2937";
     const mutedCol = isDark ? "#9ca3af" : "#6b7280";
 
-    const link = (path) => ({
+    const linkStyle = (path) => ({
         padding: "6px 12px",
         borderRadius: "8px",
         cursor: "pointer",
@@ -41,6 +41,9 @@ const Navbar = () => {
         color: isActive(path) ? "#ec4899" : mutedCol,
         border: "none",
         transition: "all 0.2s",
+        display: "flex",
+        alignItems: "center",
+        gap: "4px"
     });
 
     const authBtn = (variant) => ({
@@ -53,183 +56,105 @@ const Navbar = () => {
         border: variant === "outline" ? "2px solid #ec4899" : "none",
         background: variant === "fill" ? "linear-gradient(135deg,#ec4899,#f472b6)" : "transparent",
         color: variant === "fill" ? "white" : "#ec4899",
+        transition: "transform 0.2s ease",
     });
 
-    // ✅ FIXED PROFILE PIC (Supabase-safe)
-    const profileSrc = user?.profile_pic?.startsWith("http")
-        ? user.profile_pic
-        : null;
+    const profileSrc = user?.profile_pic?.startsWith("http") ? user.profile_pic : null;
 
     return (
         <nav style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 100,
-            background: navBg,
-            backdropFilter: "blur(14px)",
-            borderBottom: `1px solid ${border}`,
+            position: "sticky", top: 0, zIndex: 100,
+            background: navBg, backdropFilter: "blur(14px)",
+            borderBottom: `1px solid ${borderCol}`,
             boxShadow: "0 2px 14px rgba(236,72,153,0.09)",
             fontFamily: "'Segoe UI', sans-serif",
         }}>
-            <div style={{
-                maxWidth: "1000px",
-                margin: "0 auto",
-                padding: "0 18px",
-                height: "60px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "8px",
-            }}>
+            <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 18px", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
                 {/* LOGO */}
-                <div
-                    onClick={() => go("/home")}
-                    style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
-                >
+                <div onClick={() => go("/home")} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
                     <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px" }} />
-                    <span style={{
-                        background: "linear-gradient(135deg,#ec4899,#60a5fa)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent"
-                    }}>
+                    <span style={{ fontWeight: "800", background: "linear-gradient(135deg,#ec4899,#60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                         Captured Memories
                     </span>
                 </div>
 
                 {/* NAV LINKS */}
-                <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
-                    <span style={link("/home")} onClick={() => go("/home")}>Home</span>
-                    <span style={link("/about")} onClick={() => go("/about")}>About</span>
-                    <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={linkStyle("/home")} onClick={() => go("/home")}>Home</span>
+                    <span style={linkStyle("/about")} onClick={() => go("/about")}>About</span>
+                    <span style={linkStyle("/contact")} onClick={() => go("/contact")}>Contact</span>
 
-                    {/* ✅ FIXED DASHBOARD LINK */}
+                    {/* DYNAMIC DASHBOARD LINK */}
                     {user && (
                         <span
-                            style={link(user.role === "admin" ? "/admin" : "/dashboard")}
+                            style={linkStyle(user.role === "admin" ? "/admin" : "/dashboard")}
                             onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
                         >
-                            📊 My Dashboard
+                            {user.role === "admin" ? "🛠 Admin Panel" : "📊 Dashboard"}
                         </span>
                     )}
 
-                    {/* ADMIN ONLY */}
-                    {user?.role === "admin" && (
-                        <span style={link("/admin")} onClick={() => go("/admin")}>
-                            🛠 Admin Panel
-                        </span>
-                    )}
-
-                    {/* CREATE POST */}
                     {user && (
-                        <span style={link("/create")} onClick={() => go("/create")}>
+                        <span style={linkStyle("/create")} onClick={() => go("/create")}>
                             + New Post
                         </span>
                     )}
                 </div>
 
-                {/* RIGHT SIDE */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                {/* RIGHT SIDE (Theme, Profile, Auth) */}
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <button
                         onClick={toggleTheme}
                         style={{
-                            width: "50px",
-                            height: "26px",
-                            borderRadius: "13px",
-                            border: "none",
-                            cursor: "pointer",
-                            position: "relative",
-                            background: isDark
-                                ? "linear-gradient(135deg,#ec4899,#f472b6)"
-                                : "rgba(0,0,0,0.13)",
+                            width: "46px", height: "24px", borderRadius: "12px", border: "none", cursor: "pointer", position: "relative",
+                            background: isDark ? "linear-gradient(135deg,#ec4899,#f472b6)" : "rgba(0,0,0,0.1)",
                         }}
                     >
                         <div style={{
-                            position: "absolute",
-                            top: "2px",
-                            left: isDark ? "24px" : "2px",
-                            width: "22px",
-                            height: "22px",
-                            borderRadius: "50%",
-                            background: "white",
-                            transition: "left 0.3s",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "11px",
+                            position: "absolute", top: "2px", left: isDark ? "22px" : "2px",
+                            width: "20px", height: "20px", borderRadius: "50%", background: "white",
+                            transition: "left 0.2s", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px"
                         }}>
                             {isDark ? "🌙" : "☀️"}
                         </div>
                     </button>
 
                     {user ? (
-                        <>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             <div
                                 onClick={() => go("/profile")}
                                 style={{
-                                    width: "32px",
-                                    height: "32px",
-                                    borderRadius: "50%",
+                                    width: "32px", height: "32px", borderRadius: "50%",
                                     background: "linear-gradient(135deg,#ec4899,#f472b6)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "13px",
-                                    cursor: "pointer",
-                                    overflow: "hidden",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    color: "white", fontWeight: "bold", fontSize: "13px", cursor: "pointer", overflow: "hidden"
                                 }}
                             >
-                                {profileSrc
-                                    ? <img src={profileSrc} alt="av" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : user.name?.[0]?.toUpperCase()
-                                }
+                                {profileSrc ? <img src={profileSrc} alt="av" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : user.name?.[0]?.toUpperCase()}
                             </div>
-
-                            <span style={{ fontSize: "13px", color: textCol }}>
-                                {user.name?.split(" ")[0]}
-                            </span>
-
-                            <button style={authBtn("outline")} onClick={handleLogout}>
-                                Logout
-                            </button>
-                        </>
+                            <span style={{ fontSize: "13px", color: textCol, fontWeight: "500" }}>{user.name?.split(" ")[0]}</span>
+                            <button style={authBtn("outline")} onClick={handleLogout}>Logout</button>
+                        </div>
                     ) : (
-                        <>
-                            <button style={authBtn("outline")} onClick={() => go("/login")}>
-                                Login
-                            </button>
-                            <button style={authBtn("fill")} onClick={() => go("/register")}>
-                                Register
-                            </button>
-                        </>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                            <button style={authBtn("outline")} onClick={() => go("/login")}>Login</button>
+                            <button style={authBtn("fill")} onClick={() => go("/register")}>Register</button>
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* LOGOUT MODAL */}
             {showLogoutModal && (
-                <div style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    background: "rgba(0,0,0,0.45)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}>
-                    <div style={{
-                        background: isDark ? "#111" : "#fff",
-                        padding: "24px",
-                        borderRadius: "12px",
-                        textAlign: "center"
-                    }}>
-                        <p>Are you sure you want to log out?</p>
-                        <button onClick={cancelLogout}>Cancel</button>
-                        <button onClick={confirmLogout}>Logout</button>
+                <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
+                    <div style={{ background: isDark ? "#1f1f1f" : "#fff", padding: "30px", borderRadius: "16px", textAlign: "center", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)", border: `1px solid ${borderCol}`, width: "300px" }}>
+                        <h3 style={{ marginBottom: "12px", color: textCol }}>Sign Out?</h3>
+                        <p style={{ color: mutedCol, fontSize: "14px", marginBottom: "24px" }}>Are you sure you want to log out of your session?</p>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                            <button onClick={cancelLogout} style={{ flex: 1, padding: "10px", borderRadius: "8px", border: `1px solid ${borderCol}`, background: "none", color: textCol, cursor: "pointer" }}>Cancel</button>
+                            <button onClick={confirmLogout} style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", background: "#ef4444", color: "white", fontWeight: "600", cursor: "pointer" }}>Logout</button>
+                        </div>
                     </div>
                 </div>
             )}

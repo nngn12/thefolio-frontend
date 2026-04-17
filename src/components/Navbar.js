@@ -55,7 +55,10 @@ const Navbar = () => {
         color: variant === "fill" ? "white" : "#ec4899",
     });
 
-    const profileSrc = user?.profile_pic?.startsWith("http") ? user.profile_pic : null;
+    // ✅ FIXED PROFILE PIC (Supabase-safe)
+    const profileSrc = user?.profile_pic?.startsWith("http")
+        ? user.profile_pic
+        : null;
 
     return (
         <nav style={{
@@ -88,8 +91,7 @@ const Navbar = () => {
                     <span style={{
                         background: "linear-gradient(135deg,#ec4899,#60a5fa)",
                         WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        fontWeight: "bold"
+                        WebkitTextFillColor: "transparent"
                     }}>
                         Captured Memories
                     </span>
@@ -98,19 +100,32 @@ const Navbar = () => {
                 {/* NAV LINKS */}
                 <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
                     <span style={link("/home")} onClick={() => go("/home")}>Home</span>
+                    <span style={link("/about")} onClick={() => go("/about")}>About</span>
+                    <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
 
-                    {/* ✅ DASHBOARD BUTTON (Directly right of Home) */}
+                    {/* ✅ FIXED DASHBOARD LINK */}
                     {user && (
                         <span
                             style={link(user.role === "admin" ? "/admin" : "/dashboard")}
                             onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
                         >
-                            📊 Dashboard
+                            📊 My Dashboard
                         </span>
                     )}
 
-                    <span style={link("/about")} onClick={() => go("/about")}>About</span>
-                    <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
+                    {/* ADMIN ONLY */}
+                    {user?.role === "admin" && (
+                        <span style={link("/admin")} onClick={() => go("/admin")}>
+                            🛠 Admin Panel
+                        </span>
+                    )}
+
+                    {/* CREATE POST */}
+                    {user && (
+                        <span style={link("/create")} onClick={() => go("/create")}>
+                            + New Post
+                        </span>
+                    )}
                 </div>
 
                 {/* RIGHT SIDE */}
@@ -171,9 +186,11 @@ const Navbar = () => {
                                     : user.name?.[0]?.toUpperCase()
                                 }
                             </div>
+
                             <span style={{ fontSize: "13px", color: textCol }}>
                                 {user.name?.split(" ")[0]}
                             </span>
+
                             <button style={authBtn("outline")} onClick={handleLogout}>
                                 Logout
                             </button>
@@ -194,24 +211,32 @@ const Navbar = () => {
             {/* LOGOUT MODAL */}
             {showLogoutModal && (
                 <div style={{
-                    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-                    background: "rgba(0,0,0,0.45)", display: "flex",
-                    alignItems: "center", justifyContent: "center", zIndex: 1000
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: "rgba(0,0,0,0.45)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                 }}>
                     <div style={{
                         background: isDark ? "#111" : "#fff",
-                        padding: "24px", borderRadius: "12px", textAlign: "center", color: textCol
+                        padding: "24px",
+                        borderRadius: "12px",
+                        textAlign: "center"
                     }}>
                         <p>Are you sure you want to log out?</p>
-                        <div style={{ marginTop: "15px", display: "flex", gap: "10px", justifyContent: "center" }}>
-                            <button onClick={cancelLogout} style={{ padding: "8px 16px", cursor: "pointer" }}>Cancel</button>
-                            <button onClick={confirmLogout} style={{ padding: "8px 16px", cursor: "pointer", background: "#ec4899", color: "#fff", border: "none", borderRadius: "4px" }}>Logout</button>
-                        </div>
+                        <button onClick={cancelLogout}>Cancel</button>
+                        <button onClick={confirmLogout}>Logout</button>
                     </div>
                 </div>
             )}
         </nav>
     );
 };
+
+
 
 export default Navbar;

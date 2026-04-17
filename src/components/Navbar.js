@@ -3,10 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
-const BASE_URL = process.env.REACT_APP_API_URL
-    ? process.env.REACT_APP_API_URL.replace('/api', '')
-    : 'http://localhost:5000';
-
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -59,23 +55,16 @@ const Navbar = () => {
         color: variant === "fill" ? "white" : "#ec4899",
     });
 
-    const publicLinks = (
-        <>
-            <span style={link("/home")} onClick={() => go("/home")}>Home</span>
-            <span style={link("/about")} onClick={() => go("/about")}>About</span>
-            <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
-            <span style={link("/dashboard")}>📊 My Dashboard</span>
-        </>
-    );
-
-    // ── FIXED PROFILE PIC ──
-    const profileSrc = user?.profile_pic
-        ? `${BASE_URL}/uploads/${user.profile_pic}`
+    // ✅ FIXED PROFILE PIC (Supabase-safe)
+    const profileSrc = user?.profile_pic?.startsWith("http")
+        ? user.profile_pic
         : null;
 
     return (
         <nav style={{
-            position: "sticky", top: 0, zIndex: 100,
+            position: "sticky",
+            top: 0,
+            zIndex: 100,
             background: navBg,
             backdropFilter: "blur(14px)",
             borderBottom: `1px solid ${border}`,
@@ -83,94 +72,164 @@ const Navbar = () => {
             fontFamily: "'Segoe UI', sans-serif",
         }}>
             <div style={{
-                maxWidth: "1000px", margin: "0 auto",
-                padding: "0 18px", height: "60px",
-                display: "flex", alignItems: "center",
-                justifyContent: "space-between", gap: "8px",
+                maxWidth: "1000px",
+                margin: "0 auto",
+                padding: "0 18px",
+                height: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "8px",
             }}>
+
                 {/* LOGO */}
-                <div onClick={() => go("/home")} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                    <img src={`${BASE_URL}/uploads/logo.png`} alt="logo" style={{ width: "32px", height: "32px" }} />
-                    <span style={{ background: "linear-gradient(135deg,#ec4899,#60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Captured Memories</span>
+                <div
+                    onClick={() => go("/home")}
+                    style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
+                >
+                    <img src="/logo.png" alt="logo" style={{ width: "32px", height: "32px" }} />
+                    <span style={{
+                        background: "linear-gradient(135deg,#ec4899,#60a5fa)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent"
+                    }}>
+                        Captured Memories
+                    </span>
                 </div>
 
+                {/* NAV LINKS */}
                 <div style={{ display: "flex", alignItems: "center", gap: "2px", flexWrap: "nowrap" }}>
-                    {user?.role === "admin" ? (
-                        <>
-                            <span style={link("/admin")} onClick={() => go("/admin")}>🛠 Dashboard</span>
-                            {publicLinks}
-                        </>
-                    ) : (
-                        <>
-                            {publicLinks}
-                            {user && <span style={link("/create")} onClick={() => go("/create")}>+ New Post</span>}
-                        </>
+                    <span style={link("/home")} onClick={() => go("/home")}>Home</span>
+                    <span style={link("/about")} onClick={() => go("/about")}>About</span>
+                    <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
+
+                    {/* ✅ FIXED DASHBOARD LINK */}
+                    {user && (
+                        <span
+                            style={link(user.role === "admin" ? "/admin" : "/dashboard")}
+                            onClick={() => go(user.role === "admin" ? "/admin" : "/dashboard")}
+                        >
+                            📊 My Dashboard
+                        </span>
+                    )}
+
+                    {/* ADMIN ONLY */}
+                    {user?.role === "admin" && (
+                        <span style={link("/admin")} onClick={() => go("/admin")}>
+                            🛠 Admin Panel
+                        </span>
+                    )}
+
+                    {/* CREATE POST */}
+                    {user && (
+                        <span style={link("/create")} onClick={() => go("/create")}>
+                            + New Post
+                        </span>
                     )}
                 </div>
 
+                {/* RIGHT SIDE */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                    <button onClick={toggleTheme} title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} style={{
-                        width: "50px", height: "26px", borderRadius: "13px",
-                        border: "none", cursor: "pointer", position: "relative",
-                        background: isDark ? "linear-gradient(135deg,#ec4899,#f472b6)" : "rgba(0,0,0,0.13)",
-                        flexShrink: 0, transition: "background 0.3s",
-                    }}>
+                    <button
+                        onClick={toggleTheme}
+                        style={{
+                            width: "50px",
+                            height: "26px",
+                            borderRadius: "13px",
+                            border: "none",
+                            cursor: "pointer",
+                            position: "relative",
+                            background: isDark
+                                ? "linear-gradient(135deg,#ec4899,#f472b6)"
+                                : "rgba(0,0,0,0.13)",
+                        }}
+                    >
                         <div style={{
-                            position: "absolute", top: "2px",
+                            position: "absolute",
+                            top: "2px",
                             left: isDark ? "24px" : "2px",
-                            width: "22px", height: "22px", borderRadius: "50%",
-                            background: "white", transition: "left 0.3s",
-                            display: "flex", alignItems: "center",
-                            justifyContent: "center", fontSize: "11px",
-                        }}>{isDark ? "🌙" : "☀️"}</div>
+                            width: "22px",
+                            height: "22px",
+                            borderRadius: "50%",
+                            background: "white",
+                            transition: "left 0.3s",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "11px",
+                        }}>
+                            {isDark ? "🌙" : "☀️"}
+                        </div>
                     </button>
 
                     {user ? (
                         <>
-                            <div onClick={() => go("/profile")} title="My Profile" style={{
-                                width: "32px", height: "32px", borderRadius: "50%",
-                                background: "linear-gradient(135deg,#ec4899,#f472b6)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                color: "white", fontWeight: "bold", fontSize: "13px",
-                                cursor: "pointer", overflow: "hidden",
-                                border: "2px solid rgba(236,72,153,0.35)", flexShrink: 0,
-                            }}>
+                            <div
+                                onClick={() => go("/profile")}
+                                style={{
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "50%",
+                                    background: "linear-gradient(135deg,#ec4899,#f472b6)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "white",
+                                    fontWeight: "bold",
+                                    fontSize: "13px",
+                                    cursor: "pointer",
+                                    overflow: "hidden",
+                                }}
+                            >
                                 {profileSrc
                                     ? <img src={profileSrc} alt="av" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                     : user.name?.[0]?.toUpperCase()
                                 }
                             </div>
-                            <span style={{ fontSize: "13px", color: textCol, fontWeight: "600", whiteSpace: "nowrap" }}>
+
+                            <span style={{ fontSize: "13px", color: textCol }}>
                                 {user.name?.split(" ")[0]}
                             </span>
-                            <button style={authBtn("outline")} onClick={handleLogout}>Logout</button>
+
+                            <button style={authBtn("outline")} onClick={handleLogout}>
+                                Logout
+                            </button>
                         </>
                     ) : (
                         <>
-                            <button style={authBtn("outline")} onClick={() => go("/login")}>Login</button>
-                            <button style={authBtn("fill")} onClick={() => go("/register")}>Register</button>
+                            <button style={authBtn("outline")} onClick={() => go("/login")}>
+                                Login
+                            </button>
+                            <button style={authBtn("fill")} onClick={() => go("/register")}>
+                                Register
+                            </button>
                         </>
                     )}
                 </div>
             </div>
 
+            {/* LOGOUT MODAL */}
             {showLogoutModal && (
                 <div style={{
-                    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-                    background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center",
-                    zIndex: 9999,
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: "rgba(0,0,0,0.45)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                 }}>
                     <div style={{
                         background: isDark ? "#111" : "#fff",
-                        padding: "24px", borderRadius: "12px",
-                        maxWidth: "320px", width: "90%",
-                        textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.2)"
+                        padding: "24px",
+                        borderRadius: "12px",
+                        textAlign: "center"
                     }}>
-                        <p style={{ color: textCol, fontSize: "16px", marginBottom: "20px" }}>Are you sure you want to log out?</p>
-                        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-                            <button onClick={cancelLogout} style={{ ...authBtn("outline"), flex: 1 }}>Cancel</button>
-                            <button onClick={confirmLogout} style={{ ...authBtn("fill"), flex: 1 }}>Logout</button>
-                        </div>
+                        <p>Are you sure you want to log out?</p>
+                        <button onClick={cancelLogout}>Cancel</button>
+                        <button onClick={confirmLogout}>Logout</button>
                     </div>
                 </div>
             )}

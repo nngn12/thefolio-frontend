@@ -14,7 +14,7 @@ import EditPostPage from "./pages/EditPostPage";
 import PostPage from "./pages/PostPage";
 import AdminPage from "./pages/AdminPage";
 import UserDashboard from "./pages/UserDashboard";
-import VerifyPage from "./pages/VerifyPage"; // New: OTP Input Page
+import VerifyPage from "./pages/VerifyPage";
 
 function App() {
     const { user, authLoading } = useAuth();
@@ -31,13 +31,17 @@ function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
 
-                {/* Dashboard: Must be logged in AND verified */}
-                <Route path="/dashboard" element={
-                    user ? (user.is_verified ? <UserDashboard /> : <Navigate to="/verify" />) : <Navigate to="/login" />
-                } />
+                {/* ✅ Dashboard: Now only requires the user to be logged in */}
+                <Route 
+                    path="/dashboard" 
+                    element={user ? <UserDashboard /> : <Navigate to="/login" />} 
+                />
 
                 <Route path="/login" element={user ? <Navigate to="/home" /> : <LoginPage />} />
-                <Route path="/register" element={user ? <Navigate to="/verify" /> : <RegisterPage />} />
+                
+                {/* ✅ Register: Redirect to home instead of verify after registration */}
+                <Route path="/register" element={user ? <Navigate to="/home" /> : <RegisterPage />} />
+                
                 <Route path="/post/:id" element={<PostPage />} />
                 <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
                 <Route path="/create" element={user ? <CreatePostPage /> : <Navigate to="/login" />} />

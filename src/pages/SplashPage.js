@@ -1,108 +1,166 @@
-import React, { useEffect, useState } from "react";
-import API from "../api/axios";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from "../context/ThemeContext";
 import { getTheme } from "../theme";
 
-const UserDashboard = () => {
-    const { isDark } = useTheme();
-    const t = getTheme(isDark);
-    const [posts, setPosts] = useState([]);
-    const [messages, setMessages] = useState([]);
-    const [loading, setLoading] = useState(true);
+function SplashPage() {
+  const navigate = useNavigate();
+  const { isDark } = useTheme();
+  const t = getTheme(isDark);
 
-    useEffect(() => {
-        const loadDashboard = async () => {
-            try {
-                // Fetching user-specific posts and inbox messages
-                const [pRes, mRes] = await Promise.all([
-                    API.get("/posts/user/me"),
-                    API.get("/messages/inbox")
-                ]);
-                
-                // FIX: Ensure we are extracting the array correctly even if the backend wraps it
-                const postData = Array.isArray(pRes.data) ? pRes.data : (pRes.data.posts || []);
-                const messageData = Array.isArray(mRes.data) ? mRes.data : (mRes.data.messages || []);
-                
-                setPosts(postData);
-                setMessages(messageData);
-            } catch (err) {
-                console.error("Failed to fetch dashboard data:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadDashboard();
-    }, []);
+  const [dots, setDots] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [isFadingOut, setFading] = useState(false);
 
-    const sectionStyle = { 
-        background: t.card, 
-        padding: "24px", 
-        borderRadius: "16px", 
-        border: `1px solid ${t.border}`,
-        minHeight: "200px"
+  useEffect(() => {
+    const dotInterval = setInterval(() => {
+      setDots(prev => (prev.length >= 3 ? '' : prev + '.'));
+    }, 500);
+
+    const progressInterval = setInterval(() => {
+      setProgress(prev => (prev >= 100 ? 100 : prev + 1.5));
+    }, 45);
+
+    const fadeTimer = setTimeout(() => setFading(true), 3000);
+    const redirectTimer = setTimeout(() => navigate('/home'), 3500);
+
+    return () => {
+      clearInterval(dotInterval);
+      clearInterval(progressInterval);
+      clearTimeout(fadeTimer);
+      clearTimeout(redirectTimer);
     };
+  }, [navigate]);
 
-    if (loading) {
-        return (
-            <div style={{ background: t.bg, minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", color: t.text }}>
-                <p>Loading your profile data...</p>
-            </div>
-        );
-    }
+  return (
+    <div style={{
+      fontFamily: t.fontSans,
+      background: t.bg,
+      height: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      opacity: isFadingOut ? 0 : 1,
+      transition: "opacity 0.6s ease",
+      overflow: "hidden"
+    }}>
 
-    return (
-        <div style={{ background: t.bg, minHeight: "100vh", padding: "40px 20px" }}>
-            <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-                <h1 style={{ fontFamily: t.fontSerif, fontStyle: "italic", color: t.text, marginBottom: "32px" }}>Dashboard</h1>
+      {/* Background lines */}
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} style={{
+            position: "absolute",
+            width: "1px",
+            height: "40%",
+            background: `linear-gradient(to bottom, transparent, rgba(190,24,93,${0.04 + i * 0.015}), transparent)`,
+            left: `${15 + i * 18}%`,
+            top: "30%",
+            transform: `rotate(${-10 + i * 5}deg)`,
+          }} />
+        ))}
+      </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "24px" }}>
-                    
-                    {/* My Posts Section */}
-                    <div style={sectionStyle}>
-                        <h3 style={{ color: t.pink, marginBottom: "20px" }}>Your Captured Memories</h3>
-                        {posts.length === 0 ? (
-                            <p style={{ color: t.textMuted }}>You haven't posted any memories yet.</p>
-                        ) : (
-                            posts.map((p) => {
-                                // FIX: Handle both MongoDB (_id) and PostgreSQL (id) naming
-                                const postId = p.id || p._id;
-                                const postDate = p.created_at || p.createdAt;
+      <div style={{ textAlign: "center", zIndex: 1, animation: "fadeUp 0.9s ease both" }}>
 
-                                return (
-                                    <div key={postId} style={{ borderBottom: `1px solid ${t.border}`, padding: "16px 0" }}>
-                                        <h4 style={{ color: t.text, margin: "0 0 4px 0" }}>{p.title}</h4>
-                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <span style={{ fontSize: "12px", color: t.textMuted }}>
-                                                {postDate ? new Date(postDate).toLocaleDateString() : "No date"}
-                                            </span>
-                                            <span style={{ fontSize: "11px", color: t.pink, textTransform: "uppercase", letterSpacing: "1px" }}>
-                                                {p.status || "Published"}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
+        {/* ✅ FIXED LOGO */}
+        <img
+          src="/logo.png"
+          alt="TheFolio"
+          onError={(e) => {
+            // fallback if logo.png not found
+            e.target.src = "https://via.placeholder.com/80?text=Logo";
+          }}
+          style={{
+            width: "80px",
+            height: "80px",
+            borderRadius: "50%",
+            marginBottom: "20px",
+            animation: "float 3s ease-in-out infinite",
+            boxShadow: "0 8px 32px rgba(190,24,93,0.4)",
+            objectFit: "cover",
+            backgroundColor: "#fff",
+            border: "2px solid rgba(190,24,93,0.3)"
+          }}
+        />
 
-                    {/* Admin Messages Section */}
-                    <div style={sectionStyle}>
-                        <h3 style={{ color: t.pink, marginBottom: "20px" }}>Admin Correspondence</h3>
-                        {messages.length === 0 ? (
-                            <p style={{ color: t.textMuted }}>No messages from admin yet.</p>
-                        ) : (
-                            messages.map((m) => (
-                                <div key={m.id || m._id} style={{ background: t.bg, padding: "12px", borderRadius: "8px", marginBottom: "12px", border: `1px solid ${t.border}` }}>
-                                    <p style={{ fontWeight: "600", fontSize: "13px", color: t.text, marginBottom: "4px" }}>Re: Inquiry</p>
-                                    <p style={{ fontSize: "14px", color: t.textSub, margin: 0 }}>{m.admin_reply}</p>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            </div>
+        <h1 style={{
+          fontFamily: t.fontSerif,
+          fontSize: "clamp(28px, 5vw, 42px)",
+          fontWeight: "400",
+          fontStyle: "italic",
+          color: t.text,
+          marginBottom: "30px",
+        }}>
+          The Folio
+        </h1>
+
+        {/* Loader */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "15px",
+          marginBottom: "20px",
+          width: "250px",
+          margin: "0 auto 20px"
+        }}>
+          <div style={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            border: `2px solid ${t.border}`,
+            borderTop: `2px solid ${t.pink}`,
+            animation: "spin 1s linear infinite",
+            flexShrink: 0
+          }} />
+
+          <div style={{
+            flexGrow: 1,
+            height: "4px",
+            background: t.border,
+            borderRadius: "10px",
+            overflow: "hidden"
+          }}>
+            <div style={{
+              width: `${progress}%`,
+              height: "100%",
+              background: t.pink,
+              transition: "width 0.1s linear"
+            }} />
+          </div>
         </div>
-    );
-};
 
-export default UserDashboard;
+        {/* Loading text */}
+        <div style={{
+          fontSize: "13px",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: t.textMuted,
+          fontWeight: "500",
+        }}>
+          Loading
+          <span style={{ width: "20px", display: "inline-block" }}>{dots}</span>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity:0; transform:translateY(20px); }
+          to { opacity:1; transform:translateY(0); }
+        }
+
+        @keyframes float {
+          0%,100% { transform:translateY(0); }
+          50% { transform:translateY(-8px); }
+        }
+
+        @keyframes spin {
+          to { transform:rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default SplashPage;

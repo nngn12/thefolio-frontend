@@ -38,13 +38,12 @@ const Navbar = () => {
         cursor: "pointer",
         fontSize: "13px",
         fontWeight: "600",
-        whiteSpace: "nowrap",
         background: isActive(path)
             ? (isDark ? "rgba(236,72,153,0.18)" : "linear-gradient(135deg,#fce7f3,#e0f2fe)")
             : "transparent",
         color: isActive(path) ? "#ec4899" : mutedCol,
         border: "none",
-        transition: "all 0.2s",
+        whiteSpace: "nowrap",
     });
 
     const authBtn = (variant) => ({
@@ -53,9 +52,10 @@ const Navbar = () => {
         cursor: "pointer",
         fontSize: "13px",
         fontWeight: "700",
-        whiteSpace: "nowrap",
         border: variant === "outline" ? "2px solid #ec4899" : "none",
-        background: variant === "fill" ? "linear-gradient(135deg,#ec4899,#f472b6)" : "transparent",
+        background: variant === "fill"
+            ? "linear-gradient(135deg,#ec4899,#f472b6)"
+            : "transparent",
         color: variant === "fill" ? "white" : "#ec4899",
     });
 
@@ -71,23 +71,19 @@ const Navbar = () => {
             background: navBg,
             backdropFilter: "blur(14px)",
             borderBottom: `1px solid ${border}`,
-            boxShadow: "0 2px 14px rgba(236,72,153,0.09)",
             fontFamily: "'Segoe UI', sans-serif",
         }}>
             <div style={{
-                maxWidth: "1000px",
+                maxWidth: "1100px",
                 margin: "0 auto",
                 padding: "0 18px",
                 height: "60px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
             }}>
 
-                {/* LEFT SIDE */}
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-                    {/* LOGO */}
+                {/* LEFT - LOGO */}
+                <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "10px" }}>
                     <div
                         onClick={() => go("/home")}
                         style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}
@@ -106,48 +102,51 @@ const Navbar = () => {
                             Captured Memories
                         </span>
                     </div>
+                </div>
 
-                    {/* DASHBOARD + HOME FIRST */}
-                    {user?.role === "admin" ? (
-                        <span style={link("/admin")} onClick={() => go("/admin")}>
-                            🛠 Dashboard
-                        </span>
-                    ) : user ? (
-                        <span style={link("/dashboard")} onClick={() => go("/dashboard")}>
-                            Dashboard
-                        </span>
-                    ) : null}
-
+                {/* CENTER - NAV LINKS */}
+                <div style={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "14px"
+                }}>
                     <span style={link("/home")} onClick={() => go("/home")}>Home</span>
                     <span style={link("/about")} onClick={() => go("/about")}>About</span>
                     <span style={link("/contact")} onClick={() => go("/contact")}>Contact</span>
 
-                    {/* NEW POST (USER ONLY) */}
+                    {user?.role === "admin" ? (
+                        <span style={link("/admin")} onClick={() => go("/admin")}>🛠 Dashboard</span>
+                    ) : user ? (
+                        <span style={link("/dashboard")} onClick={() => go("/dashboard")}>Dashboard</span>
+                    ) : null}
+
                     {user && user.role !== "admin" && (
-                        <span style={link("/create")} onClick={() => go("/create")}>
-                            New Post
-                        </span>
+                        <span style={link("/create")} onClick={() => go("/create")}>New Post</span>
                     )}
                 </div>
 
-                {/* RIGHT SIDE */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {/* RIGHT - USER + CONTROLS */}
+                <div style={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    gap: "10px"
+                }}>
 
-                    {/* THEME TOGGLE */}
-                    <button
-                        onClick={toggleTheme}
-                        style={{
-                            width: "50px",
-                            height: "26px",
-                            borderRadius: "13px",
-                            border: "none",
-                            cursor: "pointer",
-                            position: "relative",
-                            background: isDark
-                                ? "linear-gradient(135deg,#ec4899,#f472b6)"
-                                : "rgba(0,0,0,0.13)",
-                        }}
-                    >
+                    {/* THEME */}
+                    <button onClick={toggleTheme} style={{
+                        width: "50px",
+                        height: "26px",
+                        borderRadius: "13px",
+                        border: "none",
+                        cursor: "pointer",
+                        background: isDark
+                            ? "linear-gradient(135deg,#ec4899,#f472b6)"
+                            : "rgba(0,0,0,0.13)",
+                        position: "relative",
+                    }}>
                         <div style={{
                             position: "absolute",
                             top: "2px",
@@ -186,19 +185,12 @@ const Navbar = () => {
                                 }}
                             >
                                 {profileSrc ? (
-                                    <img
-                                        src={profileSrc}
-                                        alt="profile"
-                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                    />
+                                    <img src={profileSrc} alt="profile"
+                                        style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                 ) : (
                                     user.name?.[0]?.toUpperCase()
                                 )}
                             </div>
-
-                            <span style={{ fontSize: "13px", color: textCol }}>
-                                {user.name?.split(" ")[0]}
-                            </span>
 
                             <button style={authBtn("outline")} onClick={handleLogout}>
                                 Logout
@@ -241,16 +233,10 @@ const Navbar = () => {
                         </p>
 
                         <div style={{ display: "flex", gap: "10px" }}>
-                            <button
-                                onClick={cancelLogout}
-                                style={{ ...authBtn("outline"), flex: 1 }}
-                            >
+                            <button onClick={cancelLogout} style={{ ...authBtn("outline"), flex: 1 }}>
                                 Cancel
                             </button>
-                            <button
-                                onClick={confirmLogout}
-                                style={{ ...authBtn("fill"), flex: 1 }}
-                            >
+                            <button onClick={confirmLogout} style={{ ...authBtn("fill"), flex: 1 }}>
                                 Logout
                             </button>
                         </div>

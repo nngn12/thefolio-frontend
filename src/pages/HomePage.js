@@ -14,7 +14,8 @@ const HomePage = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    // This is used ONLY for local fallback; Supabase images will ignore this.
+    const BASE_URL = process.env.REACT_APP_API_URL || "https://thefolio-backend.onrender.com";
 
     useEffect(() => {
         API.get("/posts")
@@ -45,7 +46,7 @@ const HomePage = () => {
     return (
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh", paddingBottom: "80px" }}>
 
-            {/* HERO HEADER ONLY (REMOVED CENTER PROFILE SECTION) */}
+            {/* HERO HEADER */}
             <div style={{ borderBottom: `1px solid ${t.border}`, padding: "56px 24px 48px", textAlign: "center" }}>
                 <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.pink, fontWeight: "500", marginBottom: "16px" }}>
                     Our Journal
@@ -97,7 +98,16 @@ const HomePage = () => {
                 <div style={{ display: "grid", gap: "2px" }}>
                     {posts.map((post, i) => {
                         const postId = post._id || post.id;
-                        const postImage = post.image ? `${BASE_URL}/uploads/${post.image}` : null;
+                        
+                        // ✅ DYNAMIC IMAGE LOGIC
+                        // If post.image starts with http, it's a Supabase link. 
+                        // Otherwise, it's a local filename.
+                        let postImage = null;
+                        if (post.image) {
+                            postImage = post.image.startsWith("http") 
+                                ? post.image 
+                                : `${BASE_URL}/uploads/${post.image}`;
+                        }
 
                         return (
                             <article
@@ -127,6 +137,7 @@ const HomePage = () => {
                                         {post.body?.substring(0, 120)}...
                                     </p>
 
+                                    {/* Admin Controls */}
                                     {user?.role === "admin" && (
                                         <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
                                             <button onClick={(e) => handleEdit(e, postId)} style={{ background: "none", border: "none", color: t.pink, cursor: "pointer", fontSize: "12px" }}>
@@ -139,6 +150,7 @@ const HomePage = () => {
                                     )}
                                 </div>
 
+                                {/* IMAGE SECTION */}
                                 {postImage && (
                                     <div style={{
                                         width: "120px",
@@ -146,9 +158,18 @@ const HomePage = () => {
                                         flexShrink: 0,
                                         borderRadius: "8px",
                                         overflow: "hidden",
-                                        background: t.border
+                                        background: t.border,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
                                     }}>
-                                        <img src={postImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        <img 
+                                            src={postImage} 
+                                            alt="" 
+                                            style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                                            // ✅ Error fallback: hides the broken image icon if URL fails
+                                            onError={(e) => { e.target.parentNode.style.display = 'none'; }}
+                                        />
                                     </div>
                                 )}
                             </article>

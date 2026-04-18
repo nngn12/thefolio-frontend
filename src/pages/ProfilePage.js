@@ -66,7 +66,11 @@ const ProfilePage = () => {
     const card = { background: t.card, backdropFilter: "blur(10px)", borderRadius: "20px", padding: "28px", boxShadow: t.shadow, marginBottom: "20px" };
     const inputStyle = { width: "100%", padding: "11px", borderRadius: "10px", border: `1px solid ${t.border}`, fontSize: "14px", background: t.input, color: t.text, boxSizing: "border-box", marginBottom: "14px", outline: "none" };
     const labelStyle = { display: "block", fontSize: "13px", color: t.text, fontWeight: "600", marginBottom: "4px" };
-    const picSrc = picPreview || (user?.profile_pic ? `http://localhost:5000/uploads/${user.profile_pic}` : null);
+    const picSrc =
+    picPreview ||
+    (user?.profile_pic
+        ? `${process.env.REACT_APP_API_URL}/uploads/${user.profile_pic}`
+        : null);
 
     return (
         <div style={{ fontFamily: "'Segoe UI', sans-serif", background: t.bg, minHeight: "100vh", paddingBottom: "40px" }}>

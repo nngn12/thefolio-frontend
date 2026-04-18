@@ -33,43 +33,47 @@ function SplashPage() {
   }, [navigate]);
 
   return (
-    <div style={{
-      fontFamily: t.fontSans,
-      background: t.bg,
-      height: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      opacity: isFadingOut ? 0 : 1,
-      transition: "opacity 0.6s ease",
-      overflow: "hidden"
-    }}>
-
+    <div
+      style={{
+        fontFamily: t.fontSans,
+        background: t.bg,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        opacity: isFadingOut ? 0 : 1,
+        transition: "opacity 0.6s ease",
+        overflow: "hidden",
+        position: "relative"
+      }}
+    >
       {/* Background lines */}
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
         {[...Array(5)].map((_, i) => (
-          <div key={i} style={{
-            position: "absolute",
-            width: "1px",
-            height: "40%",
-            background: `linear-gradient(to bottom, transparent, rgba(190,24,93,${0.04 + i * 0.015}), transparent)`,
-            left: `${15 + i * 18}%`,
-            top: "30%",
-            transform: `rotate(${-10 + i * 5}deg)`,
-          }} />
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              width: "1px",
+              height: "40%",
+              background: `linear-gradient(to bottom, transparent, rgba(190,24,93,${0.04 + i * 0.015}), transparent)`,
+              left: `${15 + i * 18}%`,
+              top: "30%",
+              transform: `rotate(${-10 + i * 5}deg)`,
+            }}
+          />
         ))}
       </div>
 
       <div style={{ textAlign: "center", zIndex: 1, animation: "fadeUp 0.9s ease both" }}>
 
-        {/* ✅ FIXED LOGO */}
+        {/* Logo */}
         <img
           src="/logo.png"
           alt="TheFolio"
           onError={(e) => {
-            // fallback if logo.png not found
-            e.target.src = "https://via.placeholder.com/80?text=Logo";
+            e.target.src = "https://placehold.co/80x80?text=Logo";
           }}
           style={{
             width: "80px",
@@ -84,61 +88,50 @@ function SplashPage() {
           }}
         />
 
-        <h1 style={{
-          fontFamily: t.fontSerif,
-          fontSize: "clamp(28px, 5vw, 42px)",
-          fontWeight: "400",
-          fontStyle: "italic",
-          color: t.text,
-          marginBottom: "30px",
-        }}>
+        <h1
+          style={{
+            fontFamily: t.fontSerif,
+            fontSize: "clamp(28px, 5vw, 42px)",
+            fontWeight: "400",
+            fontStyle: "italic",
+            color: t.text,
+            marginBottom: "30px",
+          }}
+        >
           The Folio
         </h1>
 
-        {/* Loader */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "15px",
-          marginBottom: "20px",
-          width: "250px",
-          margin: "0 auto 20px"
-        }}>
-          <div style={{
-            width: "24px",
-            height: "24px",
-            borderRadius: "50%",
-            border: `2px solid ${t.border}`,
-            borderTop: `2px solid ${t.pink}`,
-            animation: "spin 1s linear infinite",
-            flexShrink: 0
-          }} />
-
-          <div style={{
-            flexGrow: 1,
-            height: "4px",
-            background: t.border,
-            borderRadius: "10px",
-            overflow: "hidden"
-          }}>
-            <div style={{
-              width: `${progress}%`,
-              height: "100%",
-              background: t.pink,
-              transition: "width 0.1s linear"
-            }} />
+        {/* Progress Bar ONLY (spinner removed) */}
+        <div style={{ width: "250px", margin: "0 auto 20px" }}>
+          <div
+            style={{
+              height: "4px",
+              background: t.border,
+              borderRadius: "10px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${progress}%`,
+                height: "100%",
+                background: t.pink,
+                transition: "width 0.1s linear",
+              }}
+            />
           </div>
         </div>
 
         {/* Loading text */}
-        <div style={{
-          fontSize: "13px",
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: t.textMuted,
-          fontWeight: "500",
-        }}>
+        <div
+          style={{
+            fontSize: "13px",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: t.textMuted,
+            fontWeight: "500",
+          }}
+        >
           Loading
           <span style={{ width: "20px", display: "inline-block" }}>{dots}</span>
         </div>
@@ -153,10 +146,6 @@ function SplashPage() {
         @keyframes float {
           0%,100% { transform:translateY(0); }
           50% { transform:translateY(-8px); }
-        }
-
-        @keyframes spin {
-          to { transform:rotate(360deg); }
         }
       `}</style>
     </div>

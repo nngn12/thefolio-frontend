@@ -23,25 +23,6 @@ const HomePage = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const handleDelete = async (e, postId) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!window.confirm("Delete this post and all its comments?")) return;
-
-        try {
-            await API.delete(`/posts/${postId}`);
-            setPosts(prev => prev.filter(p => (p._id || p.id) !== postId));
-        } catch (err) {
-            alert(err.response?.data?.message || "Failed to delete");
-        }
-    };
-
-    const handleEdit = (e, postId) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigate(`/edit-post/${postId}`);
-    };
-
     return (
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh", paddingBottom: "80px" }}>
 
@@ -97,8 +78,6 @@ const HomePage = () => {
                 <div style={{ display: "grid", gap: "2px" }}>
                     {posts.map((post, i) => {
                         const postId = post._id || post.id;
-
-                        // ✅ AUTHOR SAFE DATA
                         const author = post.author || {};
                         const authorName = author.name || "Unknown";
 
@@ -110,7 +89,6 @@ const HomePage = () => {
 
                         const createdDate = post.createdAt || post.created_at;
 
-                        // ✅ IMAGE
                         let postImage = null;
                         if (post.image) {
                             postImage = post.image.startsWith("http")
@@ -132,33 +110,15 @@ const HomePage = () => {
                                 }}
                             >
                                 <div style={{ flex: 1 }}>
-
-                                    {/* ✅ AUTHOR INFO */}
-                                    <div style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "10px",
-                                        marginBottom: "10px"
-                                    }}>
+                                    {/* AUTHOR INFO */}
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
                                         <img
                                             src={authorPic}
                                             alt=""
-                                            style={{
-                                                width: "26px",
-                                                height: "26px",
-                                                borderRadius: "50%",
-                                                objectFit: "cover"
-                                            }}
+                                            style={{ width: "26px", height: "26px", borderRadius: "50%", objectFit: "cover" }}
                                         />
-
-                                        <span style={{
-                                            fontSize: "12px",
-                                            color: t.textMuted
-                                        }}>
-                                            {authorName} ·{" "}
-                                            {createdDate
-                                                ? new Date(createdDate).toLocaleDateString()
-                                                : ""}
+                                        <span style={{ fontSize: "12px", color: t.textMuted }}>
+                                            {authorName} · {createdDate ? new Date(createdDate).toLocaleDateString() : ""}
                                         </span>
                                     </div>
 
@@ -172,25 +132,9 @@ const HomePage = () => {
                                         {post.title}
                                     </h2>
 
-                                    <p style={{
-                                        fontSize: "14px",
-                                        color: t.textSub,
-                                        lineHeight: "1.65"
-                                    }}>
+                                    <p style={{ fontSize: "14px", color: t.textSub, lineHeight: "1.65" }}>
                                         {post.body?.substring(0, 120)}...
                                     </p>
-
-                                    {/* Admin Controls */}
-                                    {user?.role === "admin" && (
-                                        <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
-                                            <button onClick={(e) => handleEdit(e, postId)} style={{ background: "none", border: "none", color: t.pink, cursor: "pointer", fontSize: "12px" }}>
-                                                ✏️ Edit
-                                            </button>
-                                            <button onClick={(e) => handleDelete(e, postId)} style={{ background: "none", border: "none", color: "#ff4444", cursor: "pointer", fontSize: "12px" }}>
-                                                🗑 Delete
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
 
                                 {/* IMAGE */}

@@ -17,6 +17,7 @@ const AdminPage = () => {
     const [tab, setTab] = useState("members");
     const [loading, setLoading] = useState(true);
 
+    // 🔥 FETCH DATA
     useEffect(() => {
         if (!user || user.role !== "admin") {
             navigate("/home");
@@ -44,6 +45,16 @@ const AdminPage = () => {
 
         fetchData();
     }, [user, navigate]);
+
+    // 🔥 LIVE STATS (NO BACKEND NEEDED)
+    const activeMembers = members.filter(m => m.status === "active").length;
+
+    const stats = {
+        members: members.length,
+        active: activeMembers,
+        posts: posts.length,
+        messages: messages.length
+    };
 
     // ================= ACTIONS =================
     const toggleStatus = async (id) => {
@@ -87,7 +98,7 @@ const AdminPage = () => {
         }
     };
 
-    // ================= UI =================
+    // ================= UI STYLES =================
     const btn = (type) => ({
         padding: "6px 12px",
         borderRadius: "8px",
@@ -115,6 +126,7 @@ const AdminPage = () => {
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh" }}>
             <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 20px" }}>
 
+                {/* TITLE */}
                 <h1 style={{
                     fontFamily: t.fontSerif,
                     fontSize: "38px",
@@ -124,112 +136,123 @@ const AdminPage = () => {
                     Admin Dashboard
                 </h1>
 
-                {/* Tabs */}
+                {/* ================= STATS ================= */}
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                    gap: "16px",
+                    marginBottom: "40px"
+                }}>
+                    {[
+                        { label: "Members", val: stats.members, color: t.pink },
+                        { label: "Active", val: stats.active, color: t.success },
+                        { label: "Posts", val: stats.posts, color: "#60a5fa" },
+                        { label: "Messages", val: stats.messages, color: "#a78bfa" }
+                    ].map(s => (
+                        <div key={s.label} style={{
+                            padding: "20px",
+                            borderRadius: "10px",
+                            background: t.card,
+                            border: `1px solid ${t.border}`
+                        }}>
+                            <div style={{
+                                fontFamily: t.fontSerif,
+                                fontSize: "32px",
+                                color: s.color
+                            }}>
+                                {s.val}
+                            </div>
+                            <div style={{ fontSize: "12px", color: t.textMuted }}>
+                                {s.label}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* ================= TABS ================= */}
                 <div style={{ borderBottom: `1px solid ${t.border}`, marginBottom: "20px" }}>
                     <button style={tabStyle("members")} onClick={() => setTab("members")}>
-                        Members ({members.length})
+                        Members
                     </button>
                     <button style={tabStyle("posts")} onClick={() => setTab("posts")}>
-                        Posts ({posts.length})
+                        Posts
                     </button>
                     <button style={tabStyle("messages")} onClick={() => setTab("messages")}>
-                        Messages ({messages.length})
+                        Messages
                     </button>
                 </div>
 
                 {/* ================= MEMBERS ================= */}
                 {tab === "members" && (
-                    members.length === 0 ? (
-                        <p style={{ color: t.textMuted }}>No users</p>
-                    ) : (
-                        members.map(u => (
-                            <div key={u.id || u._id} style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                padding: "15px 0",
-                                borderBottom: `1px solid ${t.border}`
-                            }}>
-                                <div>
-                                    <div style={{ color: t.text }}>{u.name}</div>
-                                    <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                                </div>
-
-                                <div style={{ display: "flex", gap: "8px" }}>
-                                    <button
-                                        style={btn("secondary")}
-                                        onClick={() => toggleStatus(u.id || u._id)}
-                                    >
-                                        Toggle
-                                    </button>
-                                    <button
-                                        style={{ ...btn("secondary"), color: "red" }}
-                                        onClick={() => deleteUser(u.id || u._id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+                    members.map(u => (
+                        <div key={u.id || u._id} style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "15px 0",
+                            borderBottom: `1px solid ${t.border}`
+                        }}>
+                            <div>
+                                <div style={{ color: t.text }}>{u.name}</div>
+                                <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
                             </div>
-                        ))
-                    )
+
+                            <div style={{ display: "flex", gap: "8px" }}>
+                                <button style={btn("secondary")} onClick={() => toggleStatus(u.id || u._id)}>
+                                    Toggle
+                                </button>
+                                <button style={{ ...btn("secondary"), color: "red" }} onClick={() => deleteUser(u.id || u._id)}>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    ))
                 )}
 
                 {/* ================= POSTS ================= */}
                 {tab === "posts" && (
-                    posts.length === 0 ? (
-                        <p style={{ color: t.textMuted }}>No posts</p>
-                    ) : (
-                        posts.map(p => (
-                            <div key={p.id || p._id} style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                padding: "15px 0",
-                                borderBottom: `1px solid ${t.border}`
-                            }}>
-                                <div>
-                                    <div style={{ color: t.text }}>{p.title}</div>
-                                    <div style={{ fontSize: "12px", color: t.textMuted }}>
-                                        {p.body?.substring(0, 60)}...
-                                    </div>
+                    posts.map(p => (
+                        <div key={p.id || p._id} style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "15px 0",
+                            borderBottom: `1px solid ${t.border}`
+                        }}>
+                            <div>
+                                <div style={{ color: t.text }}>{p.title}</div>
+                                <div style={{ fontSize: "12px", color: t.textMuted }}>
+                                    {p.body?.substring(0, 60)}...
                                 </div>
-
-                                <button
-                                    style={{ ...btn("secondary"), color: "red" }}
-                                    onClick={() => deletePost(p.id || p._id)}
-                                >
-                                    Delete
-                                </button>
                             </div>
-                        ))
-                    )
+
+                            <button style={{ color: "red", background: "none", border: "none" }}
+                                onClick={() => deletePost(p.id || p._id)}>
+                                Delete
+                            </button>
+                        </div>
+                    ))
                 )}
 
                 {/* ================= MESSAGES ================= */}
                 {tab === "messages" && (
-                    messages.length === 0 ? (
-                        <p style={{ color: t.textMuted }}>No messages</p>
-                    ) : (
-                        messages.map(m => (
-                            <div key={m.id || m._id} style={{
-                                padding: "15px 0",
-                                borderBottom: `1px solid ${t.border}`
-                            }}>
-                                <div style={{ color: t.text, fontWeight: "500" }}>
-                                    {m.name} ({m.email})
-                                </div>
-
-                                <div style={{ color: t.textMuted, fontSize: "13px" }}>
-                                    {m.message}
-                                </div>
-
-                                <button
-                                    style={{ marginTop: "8px", ...btn("secondary"), color: "red" }}
-                                    onClick={() => deleteMessage(m.id || m._id)}
-                                >
-                                    Delete
-                                </button>
+                    messages.map(m => (
+                        <div key={m.id || m._id} style={{
+                            padding: "15px 0",
+                            borderBottom: `1px solid ${t.border}`
+                        }}>
+                            <div style={{ color: t.text, fontWeight: "500" }}>
+                                {m.name} ({m.email})
                             </div>
-                        ))
-                    )
+
+                            <div style={{ color: t.textMuted, fontSize: "13px" }}>
+                                {m.message}
+                            </div>
+
+                            <button style={{ marginTop: "8px", color: "red", background: "none", border: "none" }}
+                                onClick={() => deleteMessage(m.id || m._id)}>
+                                Delete
+                            </button>
+                        </div>
+                    ))
                 )}
 
             </div>

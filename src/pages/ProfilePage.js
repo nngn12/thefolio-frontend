@@ -34,42 +34,42 @@ const ProfilePage = () => {
             .catch(() => setMyPosts([]));
     }, [user, navigate]);
 
-    // ✅ FIXED PROFILE SAVE (SUPABASE READY BACKEND EXPECTED)
-    const handleProfileSave = async (e) => {
-        e.preventDefault();
-        setMsg("");
-        setErr("");
+   // ✅ UPDATED PROFILE SAVE FOR SUPABASE
+const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setMsg("");
+    setErr("");
 
-        try {
-            const fd = new FormData();
-            fd.append("name", name);
-            fd.append("bio", bio);
+    try {
+        const fd = new FormData();
+        fd.append("name", name);
+        fd.append("bio", bio);
 
-            if (profilePic) {
-                fd.append("profilePic", profilePic);
-            }
-
-            const res = await API.put("/auth/profile", fd, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
-
-            updateUser(res.data);
-
-            const updatedPic =
-                res.data.profile_pic
-                    ? (res.data.profile_pic.startsWith("http")
-                        ? res.data.profile_pic
-                        : `${process.env.REACT_APP_API_URL}/uploads/${res.data.profile_pic}`)
-                    : null;
-
-            setPicPreview(updatedPic);
-            setProfilePic(null);
-            setMsg("Profile updated! 🌸");
-
-        } catch (e) {
-            setErr(e.response?.data?.message || "Update failed");
+        // If a new file was selected, append it
+        if (profilePic) {
+            fd.append("profile_pic", profilePic); // Make sure key matches backend (profile_pic)
         }
-    };
+
+        const res = await API.put("/auth/profile", fd, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        // The backend should return the new user object containing the Supabase URL
+        updateUser(res.data);
+
+        // Update the local preview with the new Supabase URL from the response
+        if (res.data.profile_pic) {
+            setPicPreview(res.data.profile_pic);
+        }
+        
+        setProfilePic(null);
+        setMsg("Profile updated! 🌸");
+
+    } catch (e) {
+        console.error("Upload Error:", e);
+        setErr(e.response?.data?.message || "Update failed");
+    }
+};
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();

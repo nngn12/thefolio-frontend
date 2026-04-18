@@ -14,7 +14,6 @@ const HomePage = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // This is used ONLY for local fallback; Supabase images will ignore this.
     const BASE_URL = process.env.REACT_APP_API_URL || "https://thefolio-backend.onrender.com";
 
     useEffect(() => {
@@ -98,14 +97,24 @@ const HomePage = () => {
                 <div style={{ display: "grid", gap: "2px" }}>
                     {posts.map((post, i) => {
                         const postId = post._id || post.id;
-                        
-                        // ✅ DYNAMIC IMAGE LOGIC
-                        // If post.image starts with http, it's a Supabase link. 
-                        // Otherwise, it's a local filename.
+
+                        // ✅ AUTHOR SAFE DATA
+                        const author = post.author || {};
+                        const authorName = author.name || "Unknown";
+
+                        const authorPic = author.profile_pic
+                            ? (author.profile_pic.startsWith("http")
+                                ? author.profile_pic
+                                : `${BASE_URL}/uploads/${author.profile_pic}`)
+                            : `https://ui-avatars.com/api/?name=${authorName}&background=BE185D&color=fff`;
+
+                        const createdDate = post.createdAt || post.created_at;
+
+                        // ✅ IMAGE
                         let postImage = null;
                         if (post.image) {
-                            postImage = post.image.startsWith("http") 
-                                ? post.image 
+                            postImage = post.image.startsWith("http")
+                                ? post.image
                                 : `${BASE_URL}/uploads/${post.image}`;
                         }
 
@@ -123,6 +132,36 @@ const HomePage = () => {
                                 }}
                             >
                                 <div style={{ flex: 1 }}>
+
+                                    {/* ✅ AUTHOR INFO */}
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        marginBottom: "10px"
+                                    }}>
+                                        <img
+                                            src={authorPic}
+                                            alt=""
+                                            style={{
+                                                width: "26px",
+                                                height: "26px",
+                                                borderRadius: "50%",
+                                                objectFit: "cover"
+                                            }}
+                                        />
+
+                                        <span style={{
+                                            fontSize: "12px",
+                                            color: t.textMuted
+                                        }}>
+                                            {authorName} ·{" "}
+                                            {createdDate
+                                                ? new Date(createdDate).toLocaleDateString()
+                                                : ""}
+                                        </span>
+                                    </div>
+
                                     <h2 style={{
                                         fontFamily: t.fontSerif,
                                         fontWeight: "500",
@@ -133,7 +172,11 @@ const HomePage = () => {
                                         {post.title}
                                     </h2>
 
-                                    <p style={{ fontSize: "14px", color: t.textSub, lineHeight: "1.65" }}>
+                                    <p style={{
+                                        fontSize: "14px",
+                                        color: t.textSub,
+                                        lineHeight: "1.65"
+                                    }}>
                                         {post.body?.substring(0, 120)}...
                                     </p>
 
@@ -150,7 +193,7 @@ const HomePage = () => {
                                     )}
                                 </div>
 
-                                {/* IMAGE SECTION */}
+                                {/* IMAGE */}
                                 {postImage && (
                                     <div style={{
                                         width: "120px",
@@ -158,16 +201,12 @@ const HomePage = () => {
                                         flexShrink: 0,
                                         borderRadius: "8px",
                                         overflow: "hidden",
-                                        background: t.border,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center"
+                                        background: t.border
                                     }}>
-                                        <img 
-                                            src={postImage} 
-                                            alt="" 
-                                            style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                                            // ✅ Error fallback: hides the broken image icon if URL fails
+                                        <img
+                                            src={postImage}
+                                            alt=""
+                                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                             onError={(e) => { e.target.parentNode.style.display = 'none'; }}
                                         />
                                     </div>

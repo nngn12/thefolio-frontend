@@ -66,7 +66,7 @@ function SplashPage() {
 
       <div style={{ textAlign: "center", zIndex: 1, animation: "fadeUp 0.9s ease both" }}>
         {/* Logo with Floating Animation */}
-        <img src="/index.png" alt="TheFolio" 
+        <img src="/logo.png" alt="TheFolio" 
           style={{
             width: "80px",
             height: "80px",
@@ -87,7 +87,7 @@ function SplashPage() {
           letterSpacing: "-0.01em",
           marginBottom: "30px",
         }}>
-          The Art of Web Development
+          The Folio
         </h1>
 
         {/* Loader Row (Progress bar + Circular loader) */}

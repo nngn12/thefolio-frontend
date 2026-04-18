@@ -28,6 +28,7 @@ const AdminPage = () => {
             setLoading(true);
             try {
                 const [usersRes, postsRes, msgRes] = await Promise.all([
+                    API.get("/admin/stats"),
                     API.get("/admin/users"),
                     API.get("/admin/posts"),
                     API.get("/admin/messages").catch(() => ({ data: [] }))

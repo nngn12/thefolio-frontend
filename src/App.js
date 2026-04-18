@@ -28,6 +28,8 @@ function App() {
                 <Route path="/" element={<SplashPage />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/verify" element={<VerifyPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
 
                 {/* Dashboard: Must be logged in AND verified */}
                 <Route path="/dashboard" element={

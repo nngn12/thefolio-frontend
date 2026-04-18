@@ -17,7 +17,7 @@ const AdminPage = () => {
     const [tab, setTab] = useState("members");
     const [loading, setLoading] = useState(true);
 
-    // 🔥 FETCH DATA
+    // ================= FETCH DATA =================
     useEffect(() => {
         if (!user || user.role !== "admin") {
             navigate("/home");
@@ -28,7 +28,6 @@ const AdminPage = () => {
             setLoading(true);
             try {
                 const [usersRes, postsRes, msgRes] = await Promise.all([
-                    API.get("/admin/stats"),
                     API.get("/admin/users"),
                     API.get("/admin/posts"),
                     API.get("/admin/messages").catch(() => ({ data: [] }))
@@ -38,7 +37,7 @@ const AdminPage = () => {
                 setPosts(postsRes.data || []);
                 setMessages(msgRes.data || []);
             } catch (err) {
-                console.error(err);
+                console.error("Admin fetch error:", err);
             } finally {
                 setLoading(false);
             }
@@ -47,12 +46,13 @@ const AdminPage = () => {
         fetchData();
     }, [user, navigate]);
 
-    // 🔥 LIVE STATS (NO BACKEND NEEDED)
-    const activeMembers = members.filter(m => m.status === "active").length;
-
+    // ================= STATS =================
     const stats = {
         members: members.length,
-        active: activeMembers,
+        active: members.filter(m =>
+            (m.status && m.status.toLowerCase() === "active") ||
+            m.isActive === true
+        ).length,
         posts: posts.length,
         messages: messages.length
     };
@@ -61,8 +61,11 @@ const AdminPage = () => {
     const toggleStatus = async (id) => {
         try {
             const res = await API.put(`/admin/users/${id}/status`);
+
             setMembers(prev =>
-                prev.map(u => (u.id === id || u._id === id ? res.data.user : u))
+                prev.map(u =>
+                    (u.id === id || u._id === id) ? res.data.user : u
+                )
             );
         } catch {
             alert("Failed to update status");
@@ -71,6 +74,7 @@ const AdminPage = () => {
 
     const deleteUser = async (id) => {
         if (!window.confirm("Delete this user?")) return;
+
         try {
             await API.delete(`/admin/users/${id}`);
             setMembers(prev => prev.filter(u => u.id !== id && u._id !== id));
@@ -81,6 +85,7 @@ const AdminPage = () => {
 
     const deletePost = async (id) => {
         if (!window.confirm("Delete this post?")) return;
+
         try {
             await API.delete(`/posts/${id}`);
             setPosts(prev => prev.filter(p => p.id !== id && p._id !== id));
@@ -91,6 +96,7 @@ const AdminPage = () => {
 
     const deleteMessage = async (id) => {
         if (!window.confirm("Delete this message?")) return;
+
         try {
             await API.delete(`/admin/messages/${id}`);
             setMessages(prev => prev.filter(m => m.id !== id && m._id !== id));
@@ -99,7 +105,7 @@ const AdminPage = () => {
         }
     };
 
-    // ================= UI STYLES =================
+    // ================= STYLES =================
     const btn = (type) => ({
         padding: "6px 12px",
         borderRadius: "8px",
@@ -184,77 +190,78 @@ const AdminPage = () => {
                 </div>
 
                 {/* ================= MEMBERS ================= */}
-                {tab === "members" && (
-                    members.map(u => (
-                        <div key={u.id || u._id} style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            padding: "15px 0",
-                            borderBottom: `1px solid ${t.border}`
-                        }}>
-                            <div>
-                                <div style={{ color: t.text }}>{u.name}</div>
-                                <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                            </div>
-
-                            <div style={{ display: "flex", gap: "8px" }}>
-                                <button style={btn("secondary")} onClick={() => toggleStatus(u.id || u._id)}>
-                                    Toggle
-                                </button>
-                                <button style={{ ...btn("secondary"), color: "red" }} onClick={() => deleteUser(u.id || u._id)}>
-                                    Delete
-                                </button>
+                {tab === "members" && members.map(u => (
+                    <div key={u.id || u._id} style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "15px 0",
+                        borderBottom: `1px solid ${t.border}`
+                    }}>
+                        <div>
+                            <div style={{ color: t.text }}>{u.name}</div>
+                            <div style={{ fontSize: "12px", color: t.textMuted }}>
+                                {u.email}
                             </div>
                         </div>
-                    ))
-                )}
+
+                        <div style={{ display: "flex", gap: "8px" }}>
+                            <button style={btn("secondary")} onClick={() => toggleStatus(u.id || u._id)}>
+                                Toggle
+                            </button>
+                            <button style={{ ...btn("secondary"), color: "red" }}
+                                onClick={() => deleteUser(u.id || u._id)}>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                ))}
 
                 {/* ================= POSTS ================= */}
-                {tab === "posts" && (
-                    posts.map(p => (
-                        <div key={p.id || p._id} style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            padding: "15px 0",
-                            borderBottom: `1px solid ${t.border}`
-                        }}>
-                            <div>
-                                <div style={{ color: t.text }}>{p.title}</div>
-                                <div style={{ fontSize: "12px", color: t.textMuted }}>
-                                    {p.body?.substring(0, 60)}...
-                                </div>
+                {tab === "posts" && posts.map(p => (
+                    <div key={p.id || p._id} style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "15px 0",
+                        borderBottom: `1px solid ${t.border}`
+                    }}>
+                        <div>
+                            <div style={{ color: t.text }}>{p.title}</div>
+                            <div style={{ fontSize: "12px", color: t.textMuted }}>
+                                {p.body?.substring(0, 60)}...
                             </div>
-
-                            <button style={{ color: "red", background: "none", border: "none" }}
-                                onClick={() => deletePost(p.id || p._id)}>
-                                Delete
-                            </button>
                         </div>
-                    ))
-                )}
+
+                        <button
+                            style={{ color: "red", background: "none", border: "none" }}
+                            onClick={() => deletePost(p.id || p._id)}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                ))}
 
                 {/* ================= MESSAGES ================= */}
-                {tab === "messages" && (
-                    messages.map(m => (
-                        <div key={m.id || m._id} style={{
-                            padding: "15px 0",
-                            borderBottom: `1px solid ${t.border}`
-                        }}>
-                            <div style={{ color: t.text, fontWeight: "500" }}>
-                                {m.name} ({m.email})
-                            </div>
-
-                            <div style={{ color: t.textMuted, fontSize: "13px" }}>
-                                {m.message}
-                            </div>
-
-                            <button style={{ marginTop: "8px", color: "red", background: "none", border: "none" }}
-                                onClick={() => deleteMessage(m.id || m._id)}>
-                                Delete
-                            </button>
+                {tab === "messages" && messages.map(m => (
+                    <div key={m.id || m._id} style={{
+                        padding: "15px 0",
+                        borderBottom: `1px solid ${t.border}`
+                    }}>
+                        <div style={{ color: t.text, fontWeight: "500" }}>
+                            {m.name} ({m.email})
                         </div>
-                    ))
-                )}
+
+                        <div style={{ color: t.textMuted, fontSize: "13px" }}>
+                            {m.message}
+                        </div>
+
+                        <button
+                            style={{ marginTop: "8px", color: "red", background: "none", border: "none" }}
+                            onClick={() => deleteMessage(m.id || m._id)}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                ))}
 
             </div>
         </div>

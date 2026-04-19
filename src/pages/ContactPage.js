@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import { getTheme } from "../theme";
 import API from "../api/axios";
 
-// 1. ADDED THIS: Create a base URL for the image by removing '/api' from your environment variable
 const BASE_URL = process.env.REACT_APP_API_URL
     ? process.env.REACT_APP_API_URL.replace('/api', '')
     : 'http://localhost:5000';
@@ -19,27 +18,8 @@ const ContactPage = () => {
         email: user?.email || "",
         message: ""
     });
-    const [userMessages, setUserMessages] = useState([]);
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
-
-    const fetchUserInbox = async () => {
-    if (user?.email) {
-        try {
-            // Remove "/admin"
-            const res = await API.get("/messages"); 
-            // Filter so user only sees their own messages
-            const filtered = res.data.filter(m => m.email === user.email);
-            setUserMessages(filtered);
-        } catch (err) {
-            console.error("Fetch Error:", err);
-        }
-    }
-};
-
-    useEffect(() => {
-        fetchUserInbox();
-    }, [user]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -48,37 +28,26 @@ const ContactPage = () => {
     };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    // ... validation ...
-    try {
-        // Remove "/admin" - it's just "/messages"
-        await API.post("/messages", formData); 
-        setSuccess(true);
-        setFormData(prev => ({ ...prev, message: "" }));
-        fetchUserInbox();
-    } catch (err) {
-        console.error("Submit Error:", err.response?.data);
-        alert("Failed to send message.");
-    }
-};
+        e.preventDefault();
+        const newErrors = {};
+        if (!formData.name.trim()) newErrors.name = "Name is required";
+        if (!formData.email.trim()) newErrors.email = "Email is required";
+        if (!formData.message.trim()) newErrors.message = "Message is required";
 
-    // USER REPLY LOGIC: Appends text to the thread and marks as unread for admin
-    const handleUserReply = async (msgId, currentMessage) => {
-    const reply = window.prompt("Type your reply:");
-    if (reply && reply.trim() !== "") {
-        try {
-            const updatedText = `${currentMessage}\n\n(User Reply): ${reply}`;
-            // Remove "/admin"
-            await API.put(`/messages/${msgId}`, {
-                message: updatedText,
-                read: false
-            });
-            fetchUserInbox();
-        } catch (err) {
-            alert("Failed to send reply.");
+        if (Object.keys(newErrors).length) {
+            setErrors(newErrors);
+            return;
         }
-    }
-};
+
+        try {
+            await API.post("/messages", formData); // Corrected route
+            setSuccess(true);
+            setFormData(prev => ({ ...prev, message: "" }));
+            setTimeout(() => setSuccess(false), 5000);
+        } catch (err) {
+            alert("Failed to send message.");
+        }
+    };
 
     const inputStyle = { width: "100%", padding: "12px", marginTop: "6px", borderRadius: "10px", border: `1px solid ${t.border}`, outline: "none", background: t.input, color: t.text, fontSize: "14px", boxSizing: "border-box" };
     const labelStyle = { fontSize: "13px", color: t.text, fontWeight: "600" };
@@ -122,67 +91,10 @@ const ContactPage = () => {
                     </form>
                 </div>
 
-                {/* 2. RESTORED INBOX SECTION */}
-                {userMessages.length > 0 && (
-                    <div style={{ ...card, textAlign: "left" }}>
-                        <h2 style={{ color: t.text, marginBottom: "16px", textAlign: "center", fontSize: "18px" }}>Inbox</h2>
-                        <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "5px" }}>
-                            {userMessages.map((m) => (
-                                <div key={m.id} style={{
-                                    marginBottom: "16px",
-                                    paddingBottom: "16px",
-                                    borderBottom: `1px solid ${t.border}`
-                                }}>
-                                    <div style={{ marginBottom: "8px" }}>
-                                        <p style={{ margin: 0, fontSize: "12px", fontWeight: "bold", color: t.pink }}>
-                                            {m.name}
-                                        </p>
-                                        <p style={{ margin: "4px 0", fontSize: "14px", color: t.text, whiteSpace: "pre-wrap" }}>
-                                            {m.message}
-                                        </p>
-                                    </div>
-
-                                    {m.reply_text && (
-                                        <div style={{
-                                            marginTop: "10px",
-                                            padding: "10px",
-                                            borderRadius: "8px",
-                                            background: isDark ? "rgba(255, 255, 255, 0.05)" : "#f9f9f9",
-                                            borderLeft: `4px solid ${t.pink}`
-                                        }}>
-                                            <p style={{ margin: 0, fontSize: "13px", color: t.text }}>
-                                                <strong>Admin:</strong> {m.reply_text}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    <button
-                                        onClick={() => handleUserReply(m.id, m.message)}
-                                        style={{
-                                            background: "none",
-                                            border: "none",
-                                            color: t.pink,
-                                            fontSize: "12px",
-                                            cursor: "pointer",
-                                            marginTop: "10px",
-                                            padding: 0,
-                                            textDecoration: "underline",
-                                            fontWeight: "600"
-                                        }}
-                                    >
-                                        Reply to Admin
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* 3. MAP SECTION */}
+                {/* 2. MAP SECTION */}
                 <div style={card}>
                     <h2 style={{ color: t.text, marginBottom: "6px" }}>My Location</h2>
                     <p style={{ color: t.textSub, marginBottom: "12px" }}>This is a general location map for reference only.</p>
-                    {/* 2. ADDED THIS: Swapped localhost for the BASE_URL variable */}
                     <img src={`${BASE_URL}/uploads/map.png`} alt="Map" style={{ width: "100%", borderRadius: "10px" }} />
                 </div>
             </main>

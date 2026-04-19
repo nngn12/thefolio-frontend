@@ -17,7 +17,6 @@ const PostPage = () => {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    // ✅ Only used for fallback or legacy profile pics
     const BACKEND_URL = "https://thefolio-backend.onrender.com";
 
     useEffect(() => {
@@ -61,14 +60,13 @@ const PostPage = () => {
     );
     if (!post) return null;
 
-    const isOwner = user && (user.id === post.author_id);
+    // Check ownership carefully (handling both id and _id)
+    const isOwner = user && (user.id === post.author_id || user._id === post.author_id);
     const isAdmin = user?.role === "admin";
 
-    // ✅ FIXED: Handle profile pictures correctly
     const miniAvatar = (name, pic) => {
         const isFullUrl = pic?.startsWith('http');
         const avatarSrc = isFullUrl ? pic : `${BACKEND_URL}/uploads/${pic}`;
-
         return (
             <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: t.pinkGrad, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "11px", fontWeight: "700", overflow: "hidden", flexShrink: 0 }}>
                 {pic ? <img src={avatarSrc} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name?.[0]?.toUpperCase()}
@@ -79,8 +77,13 @@ const PostPage = () => {
     return (
         <div style={{ fontFamily: t.fontSans, background: t.bg, minHeight: "100vh", paddingBottom: "80px" }}>
             <div style={{ maxWidth: "700px", margin: "0 auto", padding: "48px 24px 0" }}>
-                <button onClick={() => navigate("/home")} style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, fontSize: "13px", fontFamily: t.fontSans, marginBottom: "36px", padding: "0", display: "flex", alignItems: "center", gap: "6px" }}>
-                    ← Back to memories
+                
+                {/* SMARTER BACK BUTTON */}
+                <button 
+                    onClick={() => isAdmin ? navigate("/admin") : navigate("/home")} 
+                    style={{ background: "none", border: "none", cursor: "pointer", color: t.textMuted, fontSize: "13px", fontFamily: t.fontSans, marginBottom: "36px", padding: "0", display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                    ← {isAdmin ? "Back to Dashboard" : "Back to memories"}
                 </button>
 
                 <article style={{ animation: "fadeUp 0.5s ease both" }}>
@@ -98,7 +101,6 @@ const PostPage = () => {
                         {post.title}
                     </h1>
 
-                    {/* ✅ FIXED: Removed BACKEND_URL prefix for Supabase images */}
                     {(() => {
                         const images = post.image ? post.image.split(',') : [];
                         if (images.length === 0) return null;
@@ -107,7 +109,7 @@ const PostPage = () => {
                                 {images.map((img, idx) => (
                                     <img
                                         key={`${img}-${idx}`}
-                                        src={img} // 👈 Using the Supabase URL directly
+                                        src={img}
                                         alt={`${post.title} ${idx + 1}`}
                                         style={{ width: "100%", borderRadius: "12px", display: "block", objectFit: "cover" }}
                                         onError={(e) => { e.target.style.display = 'none'; }}
@@ -147,10 +149,18 @@ const PostPage = () => {
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                                         <div>
-                                            <span style={{ fontSize: "13px", fontWeight: "600", color: t.pink }}>{c.author_name}</span>
+                                            <span style={{ fontSize: "13px", fontWeight: "600", color: t.pink }}>
+                                                {c.author_name}
+                                                {/* ADMIN BADGE */}
+                                                {c.author_role === "admin" && (
+                                                    <span style={{ marginLeft: '6px', fontSize: '9px', background: t.pink, color: 'white', padding: '2px 6px', borderRadius: '4px', verticalAlign: 'middle' }}>
+                                                        ADMIN
+                                                    </span>
+                                                )}
+                                            </span>
                                             <span style={{ fontSize: "12px", color: t.textMuted, marginLeft: "10px" }}>{new Date(c.created_at).toLocaleDateString()}</span>
                                         </div>
-                                        {(user?.id === c.author_id || isAdmin) && (
+                                        {(user?.id === c.author_id || user?._id === c.author_id || isAdmin) && (
                                             <button onClick={() => delComment(c.id)} style={{ background: "none", border: "none", color: t.textMuted, cursor: "pointer", fontSize: "16px", lineHeight: 1, padding: "0 4px" }}>×</button>
                                         )}
                                     </div>
@@ -180,43 +190,5 @@ const PostPage = () => {
         </div>
     );
 };
-
-// Change the "Back to memories" button to be smarter:
-<button 
-    onClick={() => isAdmin ? navigate("/admin") : navigate("/home")} 
-    style={{ 
-        background: "none", 
-        border: "none", 
-        cursor: "pointer", 
-        color: t.textMuted, 
-        fontSize: "13px", 
-        fontFamily: t.fontSans, 
-        marginBottom: "36px", 
-        padding: "0", 
-        display: "flex", 
-        alignItems: "center", 
-        gap: "6px" 
-    }}
->
-    ← {isAdmin ? "Back to Dashboard" : "Back to memories"}
-</button>
-
-<span style={{ fontSize: "13px", fontWeight: "600", color: t.pink }}>
-    {c.author_name}
-    {/* Add this badge logic */}
-    {c.author_role === "admin" && (
-        <span style={{ 
-            marginLeft: '6px', 
-            fontSize: '9px', 
-            background: t.pink, 
-            color: 'white', 
-            padding: '2px 6px', 
-            borderRadius: '4px',
-            verticalAlign: 'middle'
-        }}>
-            ADMIN
-        </span>
-    )}
-</span>
 
 export default PostPage;

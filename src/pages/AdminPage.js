@@ -75,25 +75,36 @@ const AdminPage = () => {
     };
 
     const toggleStatus = async (id) => {
-        try {
-            const res = await API.put(`/admin/users/${id}/status`);
-            setMembers(prev =>
-                prev.map(u => (u.id === id || u._id === id) ? res.data.user : u)
-            );
-        } catch {
-            alert("Failed to update status");
-        }
-    };
+    try {
+        // This hits your existing backend route to flip the status
+        const res = await API.put(`/admin/users/${id}/status`);
+
+        setMembers(prev =>
+            prev.map(u => {
+                const userId = u.id || u._id;
+                // If this is the user we edited, update their data with the response
+                return userId === id ? res.data.user : u;
+            })
+        );
+    } catch (err) {
+        console.error("Status update error:", err);
+        alert("Failed to update user status");
+    }
+};
 
     const deleteUser = async (id) => {
-        if (!window.confirm("Delete this user?")) return;
-        try {
-            await API.delete(`/admin/users/${id}`);
-            setMembers(prev => prev.filter(u => u.id !== id && u._id !== id));
-        } catch {
-            alert("Failed to delete user");
-        }
-    };
+    if (!window.confirm("Are you sure you want to permanently delete this user?")) return;
+
+    try {
+        await API.delete(`/admin/users/${id}`);
+        // Remove from local state immediately
+        setMembers(prev => prev.filter(u => (u.id !== id && u._id !== id)));
+        alert("User deleted successfully.");
+    } catch (err) {
+        console.error("Delete error:", err);
+        alert("Failed to delete user. Check if the backend route /admin/users/:id exists.");
+    }
+};
 
     const deletePost = async (id) => {
         if (!window.confirm("Delete this post?")) return;
@@ -172,18 +183,51 @@ const AdminPage = () => {
                 </div>
 
                 {/* MEMBERS TAB */}
-                {tab === "members" && members.map(u => (
-                    <div key={u.id || u._id} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>
-                        <div>
-                            <div style={{ color: t.text }}>{u.name}</div>
-                            <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                        </div>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            <button style={btn("secondary")} onClick={() => toggleStatus(u.id || u._id)}>Toggle</button>
-                            <button style={{ ...btn("secondary"), color: "red" }} onClick={() => deleteUser(u.id || u._id)}>Delete</button>
-                        </div>
-                    </div>
-                ))}
+                {tab === "members" && members.map(u => {
+    const userId = u.id || u._id;
+    // Check if the user is currently active
+    const isActive = (u.status && u.status.toLowerCase() === "active") || u.isActive === true;
+
+    return (
+        <div key={userId} style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            padding: "15px 0", 
+            borderBottom: `1px solid ${t.border}`,
+            opacity: isActive ? 1 : 0.6 // Slightly fade deactivated users
+        }}>
+            <div>
+                <div style={{ color: t.text, fontWeight: "500" }}>
+                    {u.name} 
+                    {!isActive && <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>DEACTIVATED</span>}
+                </div>
+                <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
+            </div>
+
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                {/* DEACTIVATE / ACTIVATE BUTTON */}
+                <button 
+                    style={{ 
+                        ...btn("secondary"), 
+                        color: isActive ? "#f59e0b" : "#10b981", // Orange for deactivating, Green for activating
+                        borderColor: isActive ? "#f59e0b" : "#10b981"
+                    }} 
+                    onClick={() => toggleStatus(userId)}
+                >
+                    {isActive ? "Deactivate" : "Activate"}
+                </button>
+
+                {/* DELETE BUTTON */}
+                <button 
+                    style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
+                    onClick={() => deleteUser(userId)}
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    );
+})}
 
                 {/* POSTS TAB */}
                 {tab === "posts" && posts.map(p => (

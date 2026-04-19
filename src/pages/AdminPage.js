@@ -106,14 +106,17 @@ const AdminPage = () => {
     };
 
     const deleteMessage = async (id) => {
-        if (!window.confirm("Delete this message?")) return;
-        try {
-            await API.delete(`/admin/messages/${id}`);
-            setMessages(prev => prev.filter(m => m.id !== id && m._id !== id));
-        } catch {
-            alert("Failed to delete message");
-        }
-    };
+    if (!window.confirm("Delete this message?")) return;
+    try {
+        // Change this path to match your backend route
+        await API.delete(`/messages/${id}`); 
+        setMessages(prev => prev.filter(m => m.id !== id));
+        alert("Deleted! ✨");
+    } catch (err) {
+        console.error(err);
+        alert("Failed to delete message.");
+    }
+};
 
     // ================= STYLES =================
     const btn = (type) => ({
@@ -172,18 +175,34 @@ const AdminPage = () => {
                 </div>
 
                 {/* MEMBERS TAB */}
-                {tab === "members" && members.map(u => (
-                    <div key={u.id || u._id} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>
-                        <div>
-                            <div style={{ color: t.text }}>{u.name}</div>
-                            <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                        </div>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            <button style={btn("secondary")} onClick={() => toggleStatus(u.id || u._id)}>Toggle</button>
-                            <button style={{ ...btn("secondary"), color: "red" }} onClick={() => deleteUser(u.id || u._id)}>Delete</button>
-                        </div>
-                    </div>
-                ))}
+                {/* MESSAGES TAB */}
+{tab === "messages" && messages.map(m => (
+    <div key={m.id} style={{ padding: "20px 0", borderBottom: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "10px", gap: "12px" }}>
+            {/* Default Avatar using the first letter of their name */}
+            <div style={{ 
+                width: "40px", height: "40px", borderRadius: "50%", 
+                background: t.pink, color: "white", display: "flex", 
+                alignItems: "center", justifyContent: "center", fontWeight: "bold" 
+            }}>
+                {m.name.charAt(0).toUpperCase()}
+            </div>
+            
+            <div>
+                <div style={{ color: t.text, fontWeight: "600" }}>{m.name}</div>
+                <div style={{ fontSize: "12px", color: t.textMuted }}>
+                    {m.email} • {m.created_at ? new Date(m.created_at).toLocaleString() : "Recently"}
+                </div>
+            </div>
+        </div>
+
+        <div style={{ color: t.text, fontSize: "14px", paddingLeft: "52px" }}>
+            {m.message}
+        </div>
+        
+        {/* ... existing reply UI buttons ... */}
+    </div>
+))}
 
                 {/* POSTS TAB */}
                 {tab === "posts" && posts.map(p => (

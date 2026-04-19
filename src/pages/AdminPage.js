@@ -183,51 +183,48 @@ const AdminPage = () => {
                 </div>
 
                 {/* MEMBERS TAB */}
-                {tab === "members" && members.map(u => {
-    const userId = u.id || u._id;
-    // Check if the user is currently active
-    const isActive = (u.status && u.status.toLowerCase() === "active") || u.isActive === true;
+                {/* MEMBERS TAB */}
+{tab === "members" && members
+    .filter(u => u.role !== "admin") // This hides all admins from the list
+    .map(u => {
+        const userId = u.id || u._id;
+        const isActive = (u.status && u.status.toLowerCase() === "active") || u.isActive === true;
 
-    return (
-        <div key={userId} style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            padding: "15px 0", 
-            borderBottom: `1px solid ${t.border}`,
-            opacity: isActive ? 1 : 0.6 // Slightly fade deactivated users
-        }}>
-            <div>
-                <div style={{ color: t.text, fontWeight: "500" }}>
-                    {u.name} 
-                    {!isActive && <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>DEACTIVATED</span>}
+        return (
+            <div key={userId} style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                padding: "15px 0", 
+                borderBottom: `1px solid ${t.border}`,
+                opacity: isActive ? 1 : 0.6 
+            }}>
+                <div>
+                    <div style={{ color: t.text, fontWeight: "500" }}>
+                        {u.name} 
+                        {!isActive && <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>DEACTIVATED</span>}
+                    </div>
+                    <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
                 </div>
-                <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-            </div>
 
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                {/* DEACTIVATE / ACTIVATE BUTTON */}
-                <button 
-                    style={{ 
-                        ...btn("secondary"), 
-                        color: isActive ? "#f59e0b" : "#10b981", // Orange for deactivating, Green for activating
-                        borderColor: isActive ? "#f59e0b" : "#10b981"
-                    }} 
-                    onClick={() => toggleStatus(userId)}
-                >
-                    {isActive ? "Deactivate" : "Activate"}
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <button 
+                        style={{ ...btn("secondary"), color: isActive ? "#f59e0b" : "#10b981" }} 
+                        onClick={() => toggleStatus(userId)}
+                    >
+                        {isActive ? "Deactivate" : "Activate"}
+                    </button>
 
-                {/* DELETE BUTTON */}
-                <button 
-                    style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
-                    onClick={() => deleteUser(userId)}
-                >
-                    Delete
-                </button>
+                    <button 
+                        style={{ ...btn("secondary"), color: "red" }} 
+                        onClick={() => deleteUser(userId)}
+                    >
+                        Delete
+                    </button>
+                </div>
             </div>
-        </div>
-    );
-})}
+        );
+    })
+}
 
                 {/* POSTS TAB */}
                 {tab === "posts" && posts.map(p => (

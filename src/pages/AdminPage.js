@@ -236,15 +236,49 @@ const AdminPage = () => {
     })
 }
                 {/* POSTS TAB */}
-                {tab === "posts" && posts.map(p => (
-                    <div key={p.id || p._id} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>
-                        <div>
-                            <div style={{ color: t.text }}>{p.title}</div>
-                            <div style={{ fontSize: "12px", color: t.textMuted }}>{p.body?.substring(0, 60)}...</div>
-                        </div>
-                        <button style={{ color: "red", background: "none", border: "none", cursor: "pointer" }} onClick={() => deletePost(p.id || p._id)}>Delete</button>
-                    </div>
-                ))}
+                {/* POSTS TAB */}
+{tab === "posts" && posts.map(p => {
+    const postId = p.id || p._id;
+    
+    return (
+        <div key={postId} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>
+            <div style={{ flex: 1 }}>
+                <div style={{ color: t.text, fontWeight: "500" }}>{p.title}</div>
+                <div style={{ fontSize: "12px", color: t.textMuted }}>
+                    By: {p.author_name || 'Unknown'} • {new Date(p.created_at).toLocaleDateString()}
+                </div>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                {/* VIEW BUTTON */}
+                <button 
+                    style={{ 
+                        ...btn("secondary"), 
+                        color: "#60a5fa", 
+                        borderColor: "#60a5fa" 
+                    }} 
+                    onClick={() => window.open(`/posts/${postId}`, "_blank")}
+                >
+                    View
+                </button>
+
+                {/* DELETE BUTTON */}
+                <button 
+                    style={{ 
+                        background: "none", 
+                        border: "none", 
+                        color: "red", 
+                        fontSize: "12px", 
+                        cursor: "pointer" 
+                    }} 
+                    onClick={() => deletePost(postId)}
+                >
+                    Delete
+                </button>
+            </div>
+        </div>
+    );
+})}
 
                 {/* MESSAGES TAB (Updated with Reply UI) */}
                 {tab === "messages" && messages.map(m => (

@@ -16,8 +16,6 @@ const AdminPage = () => {
     const [messages, setMessages] = useState([]);
     const [tab, setTab] = useState("members");
     const [loading, setLoading] = useState(true);
-    
-    // NEW: State for handling replies
     const [replyData, setReplyData] = useState({ id: null, text: "" });
 
     // ================= FETCH DATA =================
@@ -51,60 +49,43 @@ const AdminPage = () => {
     // ================= STATS =================
     const stats = {
         members: members.length,
-        active: members.filter(m =>
-            (m.status && m.status.toLowerCase() === "active") ||
-            m.isActive === true
-        ).length,
+        active: members.filter(m => (m.status?.toLowerCase() === "active") || m.isActive === true).length,
         posts: posts.length,
         messages: messages.length
     };
 
     // ================= ACTIONS =================
-    
-    // NEW: Action to send a reply to the database
     const handleSendReply = async (id) => {
         if (!replyData.text.trim()) return alert("Please type a message.");
         try {
             await API.put(`/messages/${id}/reply`, { reply_text: replyData.text });
             alert("Reply sent! 🚀");
             setReplyData({ id: null, text: "" });
-            fetchData(); // Refresh the message list to show the new reply
+            fetchData(); 
         } catch (err) {
-            alert("Failed to send reply. Ensure the backend route is ready.");
+            alert("Failed to send reply.");
         }
     };
 
     const toggleStatus = async (id) => {
-    try {
-        // This hits your existing backend route to flip the status
-        const res = await API.put(`/admin/users/${id}/status`);
-
-        setMembers(prev =>
-            prev.map(u => {
-                const userId = u.id || u._id;
-                // If this is the user we edited, update their data with the response
-                return userId === id ? res.data.user : u;
-            })
-        );
-    } catch (err) {
-        console.error("Status update error:", err);
-        alert("Failed to update user status");
-    }
-};
+        try {
+            const res = await API.put(`/admin/users/${id}/status`);
+            setMembers(prev => prev.map(u => (u.id === id || u._id === id) ? res.data.user : u));
+        } catch (err) {
+            alert("Failed to update user status");
+        }
+    };
 
     const deleteUser = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
-    try {
-        // Ensure this matches the backend mount point exactly
-        await API.delete(`/admin/users/${id}`); 
-        
-        setMembers(prev => prev.filter(u => (u.id !== id && u._id !== id)));
-        alert("User removed! ✨");
-    } catch (err) {
-        console.error("Delete error:", err);
-        alert("Delete failed. Check backend logs on Render.");
-    }
-};
+        if (!window.confirm("Are you sure you want to remove this user?")) return;
+        try {
+            await API.delete(`/admin/users/${id}`); 
+            setMembers(prev => prev.filter(u => u.id !== id && u._id !== id));
+            alert("User removed! ✨");
+        } catch (err) {
+            alert("Delete failed.");
+        }
+    };
 
     const deletePost = async (id) => {
         if (!window.confirm("Delete this post?")) return;
@@ -183,154 +164,78 @@ const AdminPage = () => {
                 </div>
 
                 {/* MEMBERS TAB */}
-                {/* MEMBERS TAB */}
-{tab === "members" && members
-    // 1. FILTER: Remove admins and your own account from the list
-    .filter(u => u.role?.toLowerCase() !== "admin" && u.email !== user?.email)
-    // 2. MAP: Render the remaining regular members
-    .map(u => {
-        const userId = u.id || u._id;
-        const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
+                {tab === "members" && members
+                    .filter(u => u.role?.toLowerCase() !== "admin" && u.email !== user?.email)
+                    .map(u => {
+                        const userId = u.id || u._id;
+                        const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
+                        return (
+                            <div key={userId} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}`, opacity: isActive ? 1 : 0.6 }}>
+                                <div>
+                                    <div style={{ color: t.text, fontWeight: "500" }}>
+                                        {u.name} {!isActive && <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>DEACTIVATED</span>}
+                                    </div>
+                                    <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
+                                </div>
+                                <div style={{ display: "flex", gap: "8px" }}>
+                                    <button style={{ ...btn("secondary"), color: isActive ? "#f59e0b" : "#10b981", borderColor: isActive ? "#f59e0b" : "#10b981" }} onClick={() => toggleStatus(userId)}>
+                                        {isActive ? "Deactivate" : "Activate"}
+                                    </button>
+                                    <button style={{ ...btn("secondary"), color: "red", borderColor: "red" }} onClick={() => deleteUser(userId)}>Delete</button>
+                                </div>
+                            </div>
+                        );
+                    })
+                }
 
-        return (
-            <div key={userId} style={{ 
-                display: "flex", 
-                justifyContent: "space-between", 
-                padding: "15px 0", 
-                borderBottom: `1px solid ${t.border}`,
-                opacity: isActive ? 1 : 0.6 
-            }}>
-                <div>
-                    <div style={{ color: t.text, fontWeight: "500" }}>
-                        {u.name} 
-                        {!isActive && (
-                            <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>
-                                DEACTIVATED
-                            </span>
-                        )}
-                    </div>
-                    <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                </div>
-
-                <div style={{ display: "flex", gap: "8px" }}>
-                    <button 
-                        style={{ 
-                            ...btn("secondary"), 
-                            color: isActive ? "#f59e0b" : "#10b981",
-                            borderColor: isActive ? "#f59e0b" : "#10b981"
-                        }} 
-                        onClick={() => toggleStatus(userId)}
-                    >
-                        {isActive ? "Deactivate" : "Activate"}
-                    </button>
-
-                    <button 
-                        style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
-                        onClick={() => deleteUser(userId)}
-                    >
-                        Delete
-                    </button>
-                </div>
-            </div>
-        );
-    })
-}
                 {/* POSTS TAB */}
-                {/* POSTS TAB */}
-{/* POSTS TAB */}
-{tab === "posts" && posts.map(p => {
-    const postId = p.id || p._id;
-    
-    return (
-        <div key={postId} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>
-            <div style={{ flex: 1 }}>
-                <div style={{ color: t.text, fontWeight: "500" }}>{p.title}</div>
-                <div style={{ fontSize: "12px", color: t.textMuted }}>
-                    By: {p.author_name || 'Unknown'} • {new Date(p.created_at).toLocaleDateString()}
-                </div>
-            </div>
+                {tab === "posts" && posts.map(p => {
+                    const postId = p.id || p._id;
+                    return (
+                        <div key={postId} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ color: t.text, fontWeight: "500" }}>{p.title}</div>
+                                <div style={{ fontSize: "12px", color: t.textMuted }}>By: {p.author_name || 'Unknown'} • {new Date(p.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                                <button style={{ ...btn("secondary"), color: "#60a5fa", borderColor: "#60a5fa" }} onClick={() => navigate(`/posts/${postId}`)}>View</button>
+                                <button style={{ background: "none", border: "none", color: "red", fontSize: "12px", cursor: "pointer" }} onClick={() => deletePost(postId)}>Delete</button>
+                            </div>
+                        </div>
+                    );
+                })}
 
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                {/* VIEW BUTTON - Straight to the post */}
-                <button 
-                    style={{ 
-                        ...btn("secondary"), 
-                        color: "#60a5fa", 
-                        borderColor: "#60a5fa" 
-                    }} 
-                    onClick={() => navigate(`/posts/${postId}`)} 
-                >
-                    View
-                </button>
-
-                {/* DELETE BUTTON */}
-                <button 
-                    style={{ 
-                        background: "none", 
-                        border: "none", 
-                        color: "red", 
-                        fontSize: "12px", 
-                        cursor: "pointer" 
-                    }} 
-                    onClick={() => deletePost(postId)}
-                >
-                    Delete
-                </button>
-            </div>
-        </div>
-    );
-})}
-
-                {/* MESSAGES TAB (Updated with Reply UI) */}
+                {/* MESSAGES TAB */}
                 {tab === "messages" && messages.map(m => (
                     <div key={m.id || m._id} style={{ padding: "20px 0", borderBottom: `1px solid ${t.border}` }}>
                         <div style={{ color: t.text, fontWeight: "600", marginBottom: "4px" }}>
                             {m.name} <span style={{ fontWeight: "400", fontSize: "13px", color: t.textMuted }}>({m.email})</span>
                         </div>
-                        <div style={{ color: t.text, fontSize: "14px", marginBottom: "10px", lineHeight: "1.5" }}>
-                            {m.message}
-                        </div>
-
-                        {/* Display existing reply */}
+                        <div style={{ color: t.text, fontSize: "14px", marginBottom: "10px", lineHeight: "1.5" }}>{m.message}</div>
                         {m.reply_text && (
                             <div style={{ background: "rgba(16,185,129,0.1)", padding: "12px", borderRadius: "10px", marginBottom: "10px", borderLeft: "4px solid #10b981" }}>
                                 <div style={{ color: "#10b981", fontSize: "12px", fontWeight: "bold" }}>YOUR REPLY:</div>
                                 <div style={{ color: t.text, fontSize: "13px" }}>{m.reply_text}</div>
                             </div>
                         )}
-
                         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                             {replyData.id === (m.id || m._id) ? (
                                 <div style={{ width: "100%", marginTop: "10px" }}>
-                                    <textarea
-                                        value={replyData.text}
-                                        onChange={(e) => setReplyData({ ...replyData, text: e.target.value })}
-                                        placeholder="Type your reply..."
-                                        style={{ width: "100%", padding: "10px", borderRadius: "8px", border: `1px solid ${t.border}`, background: t.input, color: t.text, marginBottom: "8px" }}
-                                    />
+                                    <textarea value={replyData.text} onChange={(e) => setReplyData({ ...replyData, text: e.target.value })} style={{ width: "100%", padding: "10px", borderRadius: "8px", border: `1px solid ${t.border}`, background: t.input, color: t.text, marginBottom: "8px" }} />
                                     <button onClick={() => handleSendReply(m.id || m._id)} style={btn("primary")}>Send Reply</button>
                                     <button onClick={() => setReplyData({ id: null, text: "" })} style={{ background: "none", border: "none", color: t.textMuted, marginLeft: "10px", cursor: "pointer", fontSize: "12px" }}>Cancel</button>
                                 </div>
                             ) : (
                                 <>
-                                    <button 
-                                        style={{ background: t.pink, color: "white", border: "none", padding: "4px 10px", borderRadius: "6px", fontSize: "11px", cursor: "pointer" }}
-                                        onClick={() => setReplyData({ id: m.id || m._id, text: m.reply_text || "" })}
-                                    >
+                                    <button style={{ background: t.pink, color: "white", border: "none", padding: "4px 10px", borderRadius: "6px", fontSize: "11px", cursor: "pointer" }} onClick={() => setReplyData({ id: m.id || m._id, text: m.reply_text || "" })}>
                                         {m.reply_text ? "Edit Reply" : "Reply"}
                                     </button>
-                                    <button
-                                        style={{ color: "red", background: "none", border: "none", fontSize: "11px", cursor: "pointer" }}
-                                        onClick={() => deleteMessage(m.id || m._id)}
-                                    >
-                                        Delete Message
-                                    </button>
+                                    <button style={{ color: "red", background: "none", border: "none", fontSize: "11px", cursor: "pointer" }} onClick={() => deleteMessage(m.id || m._id)}>Delete Message</button>
                                 </>
                             )}
                         </div>
                     </div>
                 ))}
-
             </div>
         </div>
     );

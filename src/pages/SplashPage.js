@@ -90,9 +90,7 @@ function SplashPage() {
     // border: "2px solid rgba(190,24,93,0.3)" // REMOVED: Removes the circular border
   }}
 />
-
-// ... (rest of the SplashPage component is the same)
-
+  
         <h1
           style={{
             fontFamily: t.fontSerif,

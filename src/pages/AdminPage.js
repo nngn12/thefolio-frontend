@@ -183,61 +183,68 @@ const AdminPage = () => {
                 </div>
 
                 {/* MEMBERS TAB */}
-                {/* MEMBERS TAB */}
-{/* MEMBERS TAB */}
-{tab === "members" && members
-    // 1. IMPROVED FILTER: 
-    // Checks if role exists, converts to lowercase, and compares to "admin"
-    .filter(u => u.role?.toLowerCase() !== "admin") 
-    .map(u => {
-        const userId = u.id || u._id;
-        // 2. Logic to check if user is active
-        const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
+                {tab === "members" && (
+    <>
+        {/* Debug: Check your console (F12) to see why the admin is showing */}
+        {console.log("Current Members List:", members)}
+        
+        {members
+            .filter(u => {
+                // 1. Get the role safely
+                const userRole = u.role ? String(u.role).toLowerCase().trim() : "";
+                
+                // 2. EXCLUDE if role is exactly 'admin'
+                // 3. EXCLUDE if the email matches YOUR admin email (extra safety)
+                return userRole !== "admin" && u.email !== user.email;
+            })
+            .map(u => {
+                const userId = u.id || u._id;
+                const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
 
-        return (
-            <div key={userId} style={{ 
-                display: "flex", 
-                justifyContent: "space-between", 
-                padding: "15px 0", 
-                borderBottom: `1px solid ${t.border}`,
-                opacity: isActive ? 1 : 0.6 
-            }}>
-                <div>
-                    <div style={{ color: t.text, fontWeight: "500" }}>
-                        {u.name} 
-                        {!isActive && (
-                            <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>
-                                DEACTIVATED
-                            </span>
-                        )}
+                return (
+                    <div key={userId} style={{ 
+                        display: "flex", 
+                        justifyContent: "space-between", 
+                        padding: "15px 0", 
+                        borderBottom: `1px solid ${t.border}`,
+                        opacity: isActive ? 1 : 0.6 
+                    }}>
+                        <div>
+                            <div style={{ color: t.text, fontWeight: "500" }}>
+                                {u.name} 
+                                {!isActive && (
+                                    <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>
+                                        DEACTIVATED
+                                    </span>
+                                )}
+                            </div>
+                            <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "8px" }}>
+                            <button 
+                                style={{ 
+                                    ...btn("secondary"), 
+                                    color: isActive ? "#f59e0b" : "#10b981",
+                                    borderColor: isActive ? "#f59e0b" : "#10b981"
+                                }} 
+                                onClick={() => toggleStatus(userId)}
+                            >
+                                {isActive ? "Deactivate" : "Activate"}
+                            </button>
+
+                            <button 
+                                style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
+                                onClick={() => deleteUser(userId)}
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
-                    <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                </div>
-
-                <div style={{ display: "flex", gap: "8px" }}>
-                    <button 
-                        style={{ 
-                            ...btn("secondary"), 
-                            color: isActive ? "#f59e0b" : "#10b981",
-                            borderColor: isActive ? "#f59e0b" : "#10b981"
-                        }} 
-                        onClick={() => toggleStatus(userId)}
-                    >
-                        {isActive ? "Deactivate" : "Activate"}
-                    </button>
-
-                    <button 
-                        style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
-                        onClick={() => deleteUser(userId)}
-                    >
-                        Delete
-                    </button>
-                </div>
-            </div>
-        );
-    })
-}
-
+                );
+            })}
+    </>
+)}
                 {/* POSTS TAB */}
                 {tab === "posts" && posts.map(p => (
                     <div key={p.id || p._id} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>

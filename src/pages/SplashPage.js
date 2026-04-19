@@ -68,25 +68,30 @@ function SplashPage() {
 
       <div style={{ textAlign: "center", zIndex: 1, animation: "fadeUp 0.9s ease both" }}>
 
-        {/* Logo */}
-        <img
-          src="/logo.png"
-          alt="TheFolio"
-          onError={(e) => {
-            e.target.src = "https://placehold.co/80x80?text=Logo";
-          }}
-          style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
-            marginBottom: "20px",
-            animation: "float 3s ease-in-out infinite",
-            boxShadow: "0 8px 32px rgba(190,24,93,0.4)",
-            objectFit: "cover",
-            backgroundColor: "#fff",
-            border: "2px solid rgba(190,24,93,0.3)"
-          }}
-        />
+        // ... (rest of the SplashPage component is the same)
+
+{/* Logo */}
+<img
+  src="/logo.png"
+  alt="TheFolio"
+  onError={(e) => {
+    e.target.src = "https://placehold.co/80x80?text=Logo";
+  }}
+  style={{
+    width: "80px",
+    height: "auto", // 1. Allow the height to scale naturally
+    // borderRadius: "50%", // REMOVED: Removes the circular shape
+    marginBottom: "20px",
+    animation: "float 3s ease-in-out infinite",
+    // 2. Adjust the shadow to be more subtler or glow around the logo's shape
+    boxShadow: "0 8px 32px rgba(190,24,93,0.3)", 
+    objectFit: "contain", // 3. Ensure the whole logo is visible without cropping
+    // backgroundColor: "#fff", // REMOVED: Removes the white background
+    // border: "2px solid rgba(190,24,93,0.3)" // REMOVED: Removes the circular border
+  }}
+/>
+
+// ... (rest of the SplashPage component is the same)
 
         <h1
           style={{

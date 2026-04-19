@@ -24,19 +24,15 @@ const ContactPage = () => {
     const [success, setSuccess] = useState(false);
 
     const fetchUserInbox = async () => {
-    // We use the email from the form or the logged-in user
-    const emailToFetch = formData.email || user?.email;
-
-    if (emailToFetch) {
+    if (user?.email) {
         try {
-            // FIXED URL: removed "/admin"
+            // Remove "/admin"
             const res = await API.get("/messages"); 
-            
-            // Filter the messages so this user only sees theirs
-            const filtered = res.data.filter(m => m.email === emailToFetch);
+            // Filter so user only sees their own messages
+            const filtered = res.data.filter(m => m.email === user.email);
             setUserMessages(filtered);
         } catch (err) {
-            console.error("Error fetching inbox:", err);
+            console.error("Fetch Error:", err);
         }
     }
 };
@@ -53,40 +49,36 @@ const ContactPage = () => {
 
     const handleSubmit = async (e) => {
     e.preventDefault();
-    // ... validation logic ...
-
+    // ... validation ...
     try {
-        // FIXED URL: removed "/admin" 
-        // formData contains { name, email, message } from your inputs
+        // Remove "/admin" - it's just "/messages"
         await API.post("/messages", formData); 
-        
         setSuccess(true);
-        setFormData(prev => ({ ...prev, message: "" })); // Clear only the message box
-        fetchUserInbox(); // Refresh the list below
-        setTimeout(() => setSuccess(false), 5000);
+        setFormData(prev => ({ ...prev, message: "" }));
+        fetchUserInbox();
     } catch (err) {
-        console.error("Submission error:", err.response?.data);
+        console.error("Submit Error:", err.response?.data);
         alert("Failed to send message.");
     }
 };
 
     // USER REPLY LOGIC: Appends text to the thread and marks as unread for admin
     const handleUserReply = async (msgId, currentMessage) => {
-        const reply = window.prompt("Type your reply to the Admin:");
-        if (reply && reply.trim() !== "") {
-            try {
-                const updatedText = `${currentMessage}\n\n(User Reply): ${reply}`;
-                // This marks 'read' as false so the Admin sees the new notification
-                await API.put(`/admin/messages/${msgId}`, {
-                    message: updatedText,
-                    read: false
-                });
-                fetchUserInbox();
-            } catch (err) {
-                alert("Failed to send reply.");
-            }
+    const reply = window.prompt("Type your reply:");
+    if (reply && reply.trim() !== "") {
+        try {
+            const updatedText = `${currentMessage}\n\n(User Reply): ${reply}`;
+            // Remove "/admin"
+            await API.put(`/messages/${msgId}`, {
+                message: updatedText,
+                read: false
+            });
+            fetchUserInbox();
+        } catch (err) {
+            alert("Failed to send reply.");
         }
-    };
+    }
+};
 
     const inputStyle = { width: "100%", padding: "12px", marginTop: "6px", borderRadius: "10px", border: `1px solid ${t.border}`, outline: "none", background: t.input, color: t.text, fontSize: "14px", boxSizing: "border-box" };
     const labelStyle = { fontSize: "13px", color: t.text, fontWeight: "600" };

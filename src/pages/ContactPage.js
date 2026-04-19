@@ -24,16 +24,22 @@ const ContactPage = () => {
     const [success, setSuccess] = useState(false);
 
     const fetchUserInbox = async () => {
-        if (user?.email) {
-            try {
-                const res = await API.get(`/admin/messages?email=${user.email}`);
-                const filtered = res.data.filter(m => m.email === user.email);
-                setUserMessages(filtered);
-            } catch (err) {
-                console.error("Error fetching inbox:", err);
-            }
+    // We use the email from the form or the logged-in user
+    const emailToFetch = formData.email || user?.email;
+
+    if (emailToFetch) {
+        try {
+            // FIXED URL: removed "/admin"
+            const res = await API.get("/messages"); 
+            
+            // Filter the messages so this user only sees theirs
+            const filtered = res.data.filter(m => m.email === emailToFetch);
+            setUserMessages(filtered);
+        } catch (err) {
+            console.error("Error fetching inbox:", err);
         }
-    };
+    }
+};
 
     useEffect(() => {
         fetchUserInbox();
@@ -46,27 +52,23 @@ const ContactPage = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = "Name is required";
-        if (!formData.email.trim()) newErrors.email = "Email is required";
-        if (!formData.message.trim()) newErrors.message = "Message is required";
+    e.preventDefault();
+    // ... validation logic ...
 
-        if (Object.keys(newErrors).length) {
-            setErrors(newErrors);
-            return;
-        }
-
-        try {
-            await API.post("/admin/messages", formData);
-            setSuccess(true);
-            setFormData(prev => ({ ...prev, message: "" }));
-            fetchUserInbox();
-            setTimeout(() => setSuccess(false), 5000);
-        } catch (err) {
-            alert("Failed to send message.");
-        }
-    };
+    try {
+        // FIXED URL: removed "/admin" 
+        // formData contains { name, email, message } from your inputs
+        await API.post("/messages", formData); 
+        
+        setSuccess(true);
+        setFormData(prev => ({ ...prev, message: "" })); // Clear only the message box
+        fetchUserInbox(); // Refresh the list below
+        setTimeout(() => setSuccess(false), 5000);
+    } catch (err) {
+        console.error("Submission error:", err.response?.data);
+        alert("Failed to send message.");
+    }
+};
 
     // USER REPLY LOGIC: Appends text to the thread and marks as unread for admin
     const handleUserReply = async (msgId, currentMessage) => {

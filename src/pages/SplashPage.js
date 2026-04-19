@@ -68,8 +68,6 @@ function SplashPage() {
 
       <div style={{ textAlign: "center", zIndex: 1, animation: "fadeUp 0.9s ease both" }}>
 
-        // ... (rest of the SplashPage component is the same)
-
 {/* Logo */}
 <img
   src="/logo.png"

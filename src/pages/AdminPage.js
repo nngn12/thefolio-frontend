@@ -237,6 +237,7 @@ const AdminPage = () => {
 }
                 {/* POSTS TAB */}
                 {/* POSTS TAB */}
+{/* POSTS TAB */}
 {tab === "posts" && posts.map(p => {
     const postId = p.id || p._id;
     
@@ -250,14 +251,14 @@ const AdminPage = () => {
             </div>
 
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                {/* VIEW BUTTON */}
+                {/* VIEW BUTTON - Straight to the post */}
                 <button 
                     style={{ 
                         ...btn("secondary"), 
                         color: "#60a5fa", 
                         borderColor: "#60a5fa" 
                     }} 
-                    onClick={() => window.open(`/posts/${postId}`, "_blank")}
+                    onClick={() => navigate(`/posts/${postId}`)} 
                 >
                     View
                 </button>

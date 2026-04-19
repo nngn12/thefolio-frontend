@@ -93,16 +93,16 @@ const AdminPage = () => {
 };
 
     const deleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to permanently delete this user?")) return;
-
+    if (!window.confirm("Are you sure?")) return;
     try {
-        await API.delete(`/admin/users/${id}`);
-        // Remove from local state immediately
+        // Ensure this matches the backend mount point exactly
+        await API.delete(`/admin/users/${id}`); 
+        
         setMembers(prev => prev.filter(u => (u.id !== id && u._id !== id)));
-        alert("User deleted successfully.");
+        alert("User removed! ✨");
     } catch (err) {
         console.error("Delete error:", err);
-        alert("Failed to delete user. Check if the backend route /admin/users/:id exists.");
+        alert("Delete failed. Check backend logs on Render.");
     }
 };
 
@@ -183,68 +183,58 @@ const AdminPage = () => {
                 </div>
 
                 {/* MEMBERS TAB */}
-                {tab === "members" && (
-    <>
-        {/* Debug: Check your console (F12) to see why the admin is showing */}
-        {console.log("Current Members List:", members)}
-        
-        {members
-            .filter(u => {
-                // 1. Get the role safely
-                const userRole = u.role ? String(u.role).toLowerCase().trim() : "";
-                
-                // 2. EXCLUDE if role is exactly 'admin'
-                // 3. EXCLUDE if the email matches YOUR admin email (extra safety)
-                return userRole !== "admin" && u.email !== user.email;
-            })
-            .map(u => {
-                const userId = u.id || u._id;
-                const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
+                {/* MEMBERS TAB */}
+{tab === "members" && members
+    // 1. FILTER: Remove admins and your own account from the list
+    .filter(u => u.role?.toLowerCase() !== "admin" && u.email !== user?.email)
+    // 2. MAP: Render the remaining regular members
+    .map(u => {
+        const userId = u.id || u._id;
+        const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
 
-                return (
-                    <div key={userId} style={{ 
-                        display: "flex", 
-                        justifyContent: "space-between", 
-                        padding: "15px 0", 
-                        borderBottom: `1px solid ${t.border}`,
-                        opacity: isActive ? 1 : 0.6 
-                    }}>
-                        <div>
-                            <div style={{ color: t.text, fontWeight: "500" }}>
-                                {u.name} 
-                                {!isActive && (
-                                    <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>
-                                        DEACTIVATED
-                                    </span>
-                                )}
-                            </div>
-                            <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
-                        </div>
-
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            <button 
-                                style={{ 
-                                    ...btn("secondary"), 
-                                    color: isActive ? "#f59e0b" : "#10b981",
-                                    borderColor: isActive ? "#f59e0b" : "#10b981"
-                                }} 
-                                onClick={() => toggleStatus(userId)}
-                            >
-                                {isActive ? "Deactivate" : "Activate"}
-                            </button>
-
-                            <button 
-                                style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
-                                onClick={() => deleteUser(userId)}
-                            >
-                                Delete
-                            </button>
-                        </div>
+        return (
+            <div key={userId} style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                padding: "15px 0", 
+                borderBottom: `1px solid ${t.border}`,
+                opacity: isActive ? 1 : 0.6 
+            }}>
+                <div>
+                    <div style={{ color: t.text, fontWeight: "500" }}>
+                        {u.name} 
+                        {!isActive && (
+                            <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>
+                                DEACTIVATED
+                            </span>
+                        )}
                     </div>
-                );
-            })}
-    </>
-)}
+                    <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <button 
+                        style={{ 
+                            ...btn("secondary"), 
+                            color: isActive ? "#f59e0b" : "#10b981",
+                            borderColor: isActive ? "#f59e0b" : "#10b981"
+                        }} 
+                        onClick={() => toggleStatus(userId)}
+                    >
+                        {isActive ? "Deactivate" : "Activate"}
+                    </button>
+
+                    <button 
+                        style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
+                        onClick={() => deleteUser(userId)}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        );
+    })
+}
                 {/* POSTS TAB */}
                 {tab === "posts" && posts.map(p => (
                     <div key={p.id || p._id} style={{ display: "flex", justifyContent: "space-between", padding: "15px 0", borderBottom: `1px solid ${t.border}` }}>

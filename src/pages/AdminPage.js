@@ -184,11 +184,15 @@ const AdminPage = () => {
 
                 {/* MEMBERS TAB */}
                 {/* MEMBERS TAB */}
+{/* MEMBERS TAB */}
 {tab === "members" && members
-    .filter(u => u.role !== "admin") // This hides all admins from the list
+    // 1. IMPROVED FILTER: 
+    // Checks if role exists, converts to lowercase, and compares to "admin"
+    .filter(u => u.role?.toLowerCase() !== "admin") 
     .map(u => {
         const userId = u.id || u._id;
-        const isActive = (u.status && u.status.toLowerCase() === "active") || u.isActive === true;
+        // 2. Logic to check if user is active
+        const isActive = (u.status?.toLowerCase() === "active") || u.isActive === true;
 
         return (
             <div key={userId} style={{ 
@@ -201,21 +205,29 @@ const AdminPage = () => {
                 <div>
                     <div style={{ color: t.text, fontWeight: "500" }}>
                         {u.name} 
-                        {!isActive && <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>DEACTIVATED</span>}
+                        {!isActive && (
+                            <span style={{ fontSize: "10px", marginLeft: "8px", color: "red", fontWeight: "bold" }}>
+                                DEACTIVATED
+                            </span>
+                        )}
                     </div>
                     <div style={{ fontSize: "12px", color: t.textMuted }}>{u.email}</div>
                 </div>
 
                 <div style={{ display: "flex", gap: "8px" }}>
                     <button 
-                        style={{ ...btn("secondary"), color: isActive ? "#f59e0b" : "#10b981" }} 
+                        style={{ 
+                            ...btn("secondary"), 
+                            color: isActive ? "#f59e0b" : "#10b981",
+                            borderColor: isActive ? "#f59e0b" : "#10b981"
+                        }} 
                         onClick={() => toggleStatus(userId)}
                     >
                         {isActive ? "Deactivate" : "Activate"}
                     </button>
 
                     <button 
-                        style={{ ...btn("secondary"), color: "red" }} 
+                        style={{ ...btn("secondary"), color: "red", borderColor: "red" }} 
                         onClick={() => deleteUser(userId)}
                     >
                         Delete

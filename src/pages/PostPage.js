@@ -181,4 +181,42 @@ const PostPage = () => {
     );
 };
 
+// Change the "Back to memories" button to be smarter:
+<button 
+    onClick={() => isAdmin ? navigate("/admin") : navigate("/home")} 
+    style={{ 
+        background: "none", 
+        border: "none", 
+        cursor: "pointer", 
+        color: t.textMuted, 
+        fontSize: "13px", 
+        fontFamily: t.fontSans, 
+        marginBottom: "36px", 
+        padding: "0", 
+        display: "flex", 
+        alignItems: "center", 
+        gap: "6px" 
+    }}
+>
+    ← {isAdmin ? "Back to Dashboard" : "Back to memories"}
+</button>
+
+<span style={{ fontSize: "13px", fontWeight: "600", color: t.pink }}>
+    {c.author_name}
+    {/* Add this badge logic */}
+    {c.author_role === "admin" && (
+        <span style={{ 
+            marginLeft: '6px', 
+            fontSize: '9px', 
+            background: t.pink, 
+            color: 'white', 
+            padding: '2px 6px', 
+            borderRadius: '4px',
+            verticalAlign: 'middle'
+        }}>
+            ADMIN
+        </span>
+    )}
+</span>
+
 export default PostPage;
